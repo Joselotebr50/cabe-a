@@ -18,10 +18,10 @@
     user-select:none;-webkit-user-select:none;
     -webkit-tap-highlight-color:transparent;
     touch-action:manipulation;
+    transition:background .5s;
   }
   button{font-family:inherit;font-weight:700;cursor:pointer;border:none;}
 
-  /* ====== APP / TELAS ====== */
   .app{width:100%;max-width:540px;height:100dvh;height:100vh;position:relative;}
   .tela{
     position:absolute;inset:0;
@@ -62,9 +62,7 @@
     font-size:clamp(24px,7vw,34px);margin:0;color:#1f6f9c;
     text-shadow:0 3px 0 #fff;
   }
-  .menu-hero p{
-    margin:0;color:#5b7285;font-size:clamp(14px,4vw,17px);
-  }
+  .menu-hero p{margin:0;color:#5b7285;font-size:clamp(14px,4vw,17px);}
   .menu-acoes{display:flex;flex-direction:column;gap:12px;width:100%;max-width:280px;}
   .btn-grande{
     padding:16px 22px;font-size:20px;border-radius:22px;
@@ -79,9 +77,7 @@
     box-shadow:0 6px 0 #cfe6f2, 0 12px 24px #5aa9d633;
   }
   .btn-sec:active{box-shadow:0 2px 0 #cfe6f2;}
-  .menu-rodape{
-    margin-top:8px;display:flex;align-items:center;gap:12px;
-  }
+  .menu-rodape{margin-top:8px;display:flex;align-items:center;gap:12px;}
   .btn-mini{
     background:transparent;color:#8497a5;font-size:13px;
     padding:6px 10px;border-radius:10px;
@@ -89,7 +85,7 @@
   }
   .btn-mini:hover{background:#ffffff88;}
 
-  /* ====== MAPA DE FASES ====== */
+  /* ====== MAPA ====== */
   .grid-fases{
     flex:1;min-height:0;overflow-y:auto;
     display:grid;grid-template-columns:repeat(2,1fr);
@@ -107,28 +103,17 @@
     transform:translateY(3px);
     box-shadow:0 1px 0 #d8e8f0;
   }
-  .fase-card .num{
-    font-size:13px;font-weight:800;color:#8497a5;
-    letter-spacing:1px;
-  }
+  .fase-card .num{font-size:13px;font-weight:800;color:#8497a5;letter-spacing:1px;}
   .fase-card .emoji{font-size:36px;line-height:1;}
   .fase-card .tema{
     font-size:12px;line-height:1.15;color:#3a5364;
     min-height:28px;display:flex;align-items:center;justify-content:center;
   }
-  .fase-card .estrelas{
-    font-size:14px;letter-spacing:1px;line-height:1;
-    color:#ffbb1a;
-  }
+  .fase-card .estrelas{font-size:14px;letter-spacing:1px;line-height:1;color:#ffbb1a;}
   .fase-card .estrelas .vazia{color:#d6e0e6;}
-  .fase-card.bloqueada{
-    background:#eef3f6;color:#9aabba;
-    cursor:not-allowed;
-  }
+  .fase-card.bloqueada{background:#eef3f6;color:#9aabba;cursor:not-allowed;}
   .fase-card.bloqueada .emoji{filter:grayscale(1) opacity(.6);}
-  .fase-card.bloqueada .cadeado{
-    font-size:22px;color:#9aabba;
-  }
+  .fase-card.bloqueada .cadeado{font-size:22px;color:#9aabba;}
 
   /* ====== JOGO ====== */
   .pips{
@@ -143,15 +128,29 @@
     width:min(100%, calc(100dvh - 190px));
     aspect-ratio:1/1;flex:0 0 auto;
     border-radius:30px;
-    background:radial-gradient(circle at 50% 38%, #ffffffdd, #ffffff66 62%, #ffffff22 100%);
     box-shadow:inset 0 0 0 3px #ffffff99, 0 10px 26px #5aa9d62e;
     touch-action:none;overflow:hidden;
     --hs: min(18vw, 88px);
+    transition:background .5s;
   }
+
+  /* Decoração do cenário */
+  #decor{
+    position:absolute;inset:0;pointer-events:none;z-index:0;
+    overflow:hidden;
+  }
+  .decor-item{
+    position:absolute;transform:translate(-50%,-50%);
+    opacity:.55;line-height:1;
+    filter:drop-shadow(0 3px 6px #00000022);
+    user-select:none;
+  }
+
   #bodyWrap{
     position:absolute;left:50%;top:52%;width:46%;
     transform:translate(-50%,-50%);pointer-events:none;
     transition:opacity .3s;
+    z-index:2;
   }
   #bodyWrap svg{width:100%;height:auto;display:block;}
 
@@ -170,13 +169,13 @@
     50%{transform:translate(-50%,-50%) scale(1.13);opacity:.95;}
   }
 
-  #heads{position:absolute;inset:0;pointer-events:none;}
+  #heads{position:absolute;inset:0;pointer-events:none;z-index:5;}
   .head{
     position:absolute;
     width:var(--hs);height:var(--hs);
     transform:translate(-50%,-50%) translate(var(--dx,0),var(--dy,0)) scale(var(--s,1));
     transition:transform .35s cubic-bezier(.34,1.56,.64,1), opacity .3s;
-    cursor:grab;touch-action:none;z-index:5;
+    cursor:grab;touch-action:none;
     will-change:transform;
     pointer-events:auto;
   }
@@ -241,7 +240,6 @@
   .confete{position:absolute;top:-40px;pointer-events:none;z-index:55;animation:cair linear forwards;}
   @keyframes cair{to{top:112%;opacity:0;transform:rotate(420deg);}}
 
-  /* ====== OVERLAY / FIM DE FASE ====== */
   #overlay{
     position:absolute;inset:0;z-index:60;
     display:flex;align-items:center;justify-content:center;
@@ -264,10 +262,7 @@
     margin:6px 0 14px;color:#ffbb1a;
   }
   .win-card .estrelas-fim .vazia{color:#e5ebee;}
-  .win-card .acoes{
-    display:flex;flex-direction:column;gap:8px;
-    margin-top:6px;
-  }
+  .win-card .acoes{display:flex;flex-direction:column;gap:8px;margin-top:6px;}
   .win-card .acoes button{
     padding:12px 18px;font-size:16px;border-radius:16px;
     background:linear-gradient(180deg,#ffd75e,#ffbb1a);color:#7a4d00;
@@ -285,7 +280,6 @@
 <body>
 <div class="app">
 
-  <!-- ======== TELA MENU ======== -->
   <section id="telaMenu" class="tela">
     <div class="menu-hero">
       <div class="logo">🐾</div>
@@ -302,7 +296,6 @@
     </div>
   </section>
 
-  <!-- ======== TELA MAPA ======== -->
   <section id="telaMapa" class="tela hidden">
     <header class="topbar">
       <button id="btnMapaVoltar" class="icon-btn" aria-label="Voltar">←</button>
@@ -312,7 +305,6 @@
     <div id="gridFases" class="grid-fases"></div>
   </section>
 
-  <!-- ======== TELA JOGO ======== -->
   <section id="telaJogo" class="tela hidden">
     <header class="topbar">
       <button id="btnJogoVoltar" class="icon-btn" aria-label="Voltar">←</button>
@@ -321,6 +313,7 @@
     </header>
     <div class="pips" id="pips"></div>
     <div id="stage">
+      <div id="decor" aria-hidden="true"></div>
       <div class="target" aria-hidden="true"></div>
       <div id="bodyWrap"></div>
       <div id="heads"></div>
@@ -334,91 +327,127 @@
 
 <script>
 /* =========================================================
-   ANIMAIS (21 no total)
+   ANIMAIS (22 no total)
+   tipo: 'quadrupede' | 'ave' | 'peixe' | 'sapo' | 'tartaruga'
+   rabo: 'longo' | 'curto' | 'encaracolado'
    ========================================================= */
 const ANIMAIS = {
   /* Casa */
-  gato:       { emoji:'🐱', nome:'Gato',       cor:'#F2A25C', escuro:'#D9833A', claro:'#FFD9B0', som:'Miau! Miau!' },
-  cachorro:   { emoji:'🐶', nome:'Cachorro',   cor:'#C99A66', escuro:'#A87A48', claro:'#EBC9A3', som:'Au au! Au au!' },
-  coelho:     { emoji:'🐰', nome:'Coelho',     cor:'#F0E8DF', escuro:'#B4A594', claro:'#FFFFFF', som:'Nhac nhac!' },
-  passarinho: { emoji:'🐦', nome:'Passarinho', cor:'#7EC0E8', escuro:'#4A8FBC', claro:'#C8E8F8', som:'Piu piu!' },
-  peixinho:   { emoji:'🐠', nome:'Peixinho',   cor:'#FF8C6B', escuro:'#D5623F', claro:'#FFD1BE', som:'Glub glub!' },
-  hamster:    { emoji:'🐹', nome:'Hamster',    cor:'#E2B878', escuro:'#B98E4D', claro:'#F8E4B8', som:'Iiii iiii!' },
+  gato:       { emoji:'🐱', nome:'Gato',       cor:'#F2A25C', escuro:'#D9833A', claro:'#FFD9B0', som:'Miau! Miau!',    tipo:'quadrupede', rabo:'longo' },
+  cachorro:   { emoji:'🐶', nome:'Cachorro',   cor:'#C99A66', escuro:'#A87A48', claro:'#EBC9A3', som:'Au au! Au au!',  tipo:'quadrupede', rabo:'longo' },
+  coelho:     { emoji:'🐰', nome:'Coelho',     cor:'#F0E8DF', escuro:'#B4A594', claro:'#FFFFFF', som:'Nhac nhac!',     tipo:'quadrupede', rabo:'curto' },
+  passarinho: { emoji:'🐦', nome:'Passarinho', cor:'#7EC0E8', escuro:'#4A8FBC', claro:'#C8E8F8', som:'Piu piu!',       tipo:'ave' },
+  peixinho:   { emoji:'🐠', nome:'Peixinho',   cor:'#FF8C6B', escuro:'#D5623F', claro:'#FFD1BE', som:'Glub glub!',     tipo:'peixe' },
+  hamster:    { emoji:'🐹', nome:'Hamster',    cor:'#E2B878', escuro:'#B98E4D', claro:'#F8E4B8', som:'Iiii iiii!',     tipo:'quadrupede', rabo:'curto' },
 
   /* Fazenda */
-  vaca:       { emoji:'🐮', nome:'Vaca',       cor:'#F3EEE4', escuro:'#4A4A4A', claro:'#FFFFFF', som:'Muuu! Muuu!' },
-  porco:      { emoji:'🐷', nome:'Porco',      cor:'#F5A8C0', escuro:'#DE7F9E', claro:'#FFD3E0', som:'Oinc! Oinc!' },
-  ovelha:     { emoji:'🐑', nome:'Ovelha',     cor:'#F0EBE1', escuro:'#C4B9A5', claro:'#FFFFFF', som:'Bééé! Bééé!' },
-  galinha:    { emoji:'🐔', nome:'Galinha',    cor:'#FFE9A8', escuro:'#D9B84A', claro:'#FFF5CC', som:'Có có! Có có!' },
-  cavalo:     { emoji:'🐴', nome:'Cavalo',     cor:'#B07A50', escuro:'#8A5A34', claro:'#D8B080', som:'Iii hiii!' },
-  pato:       { emoji:'🦆', nome:'Pato',       cor:'#F5E64C', escuro:'#C8B420', claro:'#FFF5A0', som:'Quá quá!' },
+  vaca:       { emoji:'🐮', nome:'Vaca',       cor:'#F3EEE4', escuro:'#4A4A4A', claro:'#FFFFFF', som:'Muuu! Muuu!',    tipo:'quadrupede', rabo:'longo' },
+  porco:      { emoji:'🐷', nome:'Porco',      cor:'#F5A8C0', escuro:'#DE7F9E', claro:'#FFD3E0', som:'Oinc! Oinc!',    tipo:'quadrupede', rabo:'encaracolado' },
+  ovelha:     { emoji:'🐑', nome:'Ovelha',     cor:'#F0EBE1', escuro:'#C4B9A5', claro:'#FFFFFF', som:'Bééé! Bééé!',    tipo:'quadrupede', rabo:'curto' },
+  galinha:    { emoji:'🐔', nome:'Galinha',    cor:'#FFE9A8', escuro:'#D9B84A', claro:'#FFF5CC', som:'Có có! Có có!',  tipo:'ave' },
+  cavalo:     { emoji:'🐴', nome:'Cavalo',     cor:'#B07A50', escuro:'#8A5A34', claro:'#D8B080', som:'Iii hiii!',      tipo:'quadrupede', rabo:'longo' },
+  pato:       { emoji:'🦆', nome:'Pato',       cor:'#F5E64C', escuro:'#C8B420', claro:'#FFF5A0', som:'Quá quá!',       tipo:'ave' },
 
   /* Selva */
-  leao:       { emoji:'🦁', nome:'Leão',       cor:'#E8B84B', escuro:'#C28F2A', claro:'#FFE6A8', som:'Roar!' },
-  elefante:   { emoji:'🐘', nome:'Elefante',   cor:'#A0A4B0', escuro:'#70757F', claro:'#C8CCD6', som:'Fuummm!' },
-  macaco:     { emoji:'🐵', nome:'Macaco',     cor:'#B08058', escuro:'#8A5F3C', claro:'#D8B088', som:'Uhu uhu ah ah!' },
-  tigre:      { emoji:'🐯', nome:'Tigre',      cor:'#F0A020', escuro:'#C77800', claro:'#FFD280', som:'Grrr!' },
-  panda:      { emoji:'🐼', nome:'Panda',      cor:'#F8F8F8', escuro:'#444444', claro:'#FFFFFF', som:'Nhac nhac!' },
+  leao:       { emoji:'🦁', nome:'Leão',       cor:'#E8B84B', escuro:'#C28F2A', claro:'#FFE6A8', som:'Roar!',          tipo:'quadrupede', rabo:'longo' },
+  elefante:   { emoji:'🐘', nome:'Elefante',   cor:'#A0A4B0', escuro:'#70757F', claro:'#C8CCD6', som:'Fuummm!',        tipo:'quadrupede', rabo:'curto' },
+  macaco:     { emoji:'🐵', nome:'Macaco',     cor:'#B08058', escuro:'#8A5F3C', claro:'#D8B088', som:'Uhu uhu ah ah!', tipo:'quadrupede', rabo:'longo' },
+  tigre:      { emoji:'🐯', nome:'Tigre',      cor:'#F0A020', escuro:'#C77800', claro:'#FFD280', som:'Grrr!',          tipo:'quadrupede', rabo:'longo' },
+  panda:      { emoji:'🐼', nome:'Panda',      cor:'#F8F8F8', escuro:'#444444', claro:'#FFFFFF', som:'Nhac nhac!',     tipo:'quadrupede', rabo:'curto' },
 
   /* Água */
-  sapo:       { emoji:'🐸', nome:'Sapo',       cor:'#7BC85C', escuro:'#5AA23C', claro:'#B6E89B', som:'Croac! Croac!' },
-  golfinho:   { emoji:'🐬', nome:'Golfinho',   cor:'#88C8E8', escuro:'#5090B0', claro:'#C0E4F5', som:'Iii! Iii!' },
-  baleia:     { emoji:'🐳', nome:'Baleia',     cor:'#6EB0D8', escuro:'#3D80A8', claro:'#A8D8F0', som:'Uuuuuu!' },
-  pinguim:    { emoji:'🐧', nome:'Pinguim',    cor:'#3A3A3A', escuro:'#000000', claro:'#FFFFFF', som:'Nhonhonho!' },
-  tartaruga:  { emoji:'🐢', nome:'Tartaruga',  cor:'#7CB860', escuro:'#4A8A3A', claro:'#B0DC98', som:'Uuuu!' }
+  sapo:       { emoji:'🐸', nome:'Sapo',       cor:'#7BC85C', escuro:'#5AA23C', claro:'#B6E89B', som:'Croac! Croac!',  tipo:'sapo' },
+  golfinho:   { emoji:'🐬', nome:'Golfinho',   cor:'#88C8E8', escuro:'#5090B0', claro:'#C0E4F5', som:'Iii! Iii!',      tipo:'peixe' },
+  baleia:     { emoji:'🐳', nome:'Baleia',     cor:'#6EB0D8', escuro:'#3D80A8', claro:'#A8D8F0', som:'Uuuuuu!',        tipo:'peixe' },
+  pinguim:    { emoji:'🐧', nome:'Pinguim',    cor:'#3A3A3A', escuro:'#111111', claro:'#FFFFFF', som:'Nhonhonho!',     tipo:'ave' },
+  tartaruga:  { emoji:'🐢', nome:'Tartaruga',  cor:'#7CB860', escuro:'#4A8A3A', claro:'#B0DC98', som:'Uuuu!',          tipo:'tartaruga' }
 };
 
 const TODOS = Object.keys(ANIMAIS);
 
 /* =========================================================
+   TEMAS VISUAIS (fundo + decoração)
+   ========================================================= */
+const TEMAS = {
+  casa: {
+    fundo: 'linear-gradient(180deg,#c8e8ff 0%,#e0f0ff 42%,#d8f0b8 100%)',
+    decor: [
+      { e:'🏡', x:10, y:14, s:50 },
+      { e:'🌳', x:91, y:15, s:46 },
+      { e:'🌷', x:7,  y:90, s:30 },
+      { e:'🌻', x:94, y:90, s:34 },
+      { e:'☀️', x:50, y:6,  s:30 }
+    ]
+  },
+  fazenda: {
+    fundo: 'linear-gradient(180deg,#bfe6ff 0%,#e0f0c8 42%,#b8e090 100%)',
+    decor: [
+      { e:'☀️', x:50, y:6,  s:34 },
+      { e:'🌾', x:8,  y:88, s:36 },
+      { e:'🌾', x:92, y:88, s:36 },
+      { e:'🌻', x:10, y:14, s:32 },
+      { e:'🚜', x:90, y:88, s:34 }
+    ]
+  },
+  selva: {
+    fundo: 'linear-gradient(180deg,#3a7a30 0%,#6aa85a 45%,#88c878 100%)',
+    decor: [
+      { e:'🌴', x:8,  y:12, s:56 },
+      { e:'🌴', x:92, y:14, s:52 },
+      { e:'🌿', x:5,  y:88, s:38 },
+      { e:'🍃', x:95, y:88, s:34 },
+      { e:'🐒', x:50, y:5,  s:26 }
+    ]
+  },
+  agua: {
+    fundo: 'linear-gradient(180deg,#bce8ff 0%,#7ec8e8 45%,#3a90c0 100%)',
+    decor: [
+      { e:'🫧', x:10, y:12, s:32 },
+      { e:'🫧', x:88, y:18, s:26 },
+      { e:'🌊', x:8,  y:91, s:42 },
+      { e:'🌊', x:92, y:91, s:42 },
+      { e:'🐚', x:50, y:93, s:26 }
+    ]
+  },
+  rainbow: {
+    fundo: 'linear-gradient(180deg,#ffd0e8 0%,#fff0a8 45%,#d0e8ff 100%)',
+    decor: [
+      { e:'🌈', x:12, y:14, s:52 },
+      { e:'🎈', x:88, y:16, s:40 },
+      { e:'⭐', x:8,  y:88, s:28 },
+      { e:'✨', x:92, y:90, s:30 }
+    ]
+  },
+  trofeu: {
+    fundo: 'linear-gradient(180deg,#ffe9a8 0%,#ffd060 50%,#e8a020 100%)',
+    decor: [
+      { e:'🏆', x:10, y:14, s:48 },
+      { e:'👑', x:90, y:12, s:42 },
+      { e:'⭐', x:8,  y:90, s:28 },
+      { e:'🥇', x:92, y:90, s:32 },
+      { e:'✨', x:50, y:6,  s:24 }
+    ]
+  }
+};
+
+/* =========================================================
    FASES
    ========================================================= */
 const FASES = [
-  { tema:'Casa I',         emoji:'🏡', fundo:['#a9e4ff','#cdefff','#ffe6b8'],
-    animais:['gato','cachorro','coelho','passarinho'],
-    opcoes:3, acertos:4 },
-  { tema:'Casa II',        emoji:'🏠', fundo:['#a9e4ff','#cdefff','#ffe6b8'],
-    animais:['gato','cachorro','coelho','passarinho','peixinho','hamster'],
-    opcoes:3, acertos:4 },
-  { tema:'Fazenda I',      emoji:'🚜', fundo:['#b8e6a0','#d7f5c4','#f0f8d0'],
-    animais:['vaca','porco','ovelha','galinha'],
-    opcoes:3, acertos:5 },
-  { tema:'Fazenda II',     emoji:'🌾', fundo:['#b8e6a0','#d7f5c4','#f0f8d0'],
-    animais:['vaca','porco','ovelha','galinha','cavalo','pato'],
-    opcoes:4, acertos:5 },
-  { tema:'Selva',          emoji:'🌴', fundo:['#7bc06a','#a8d88a','#d8e8a8'],
-    animais:['leao','elefante','macaco','tigre','panda'],
-    opcoes:4, acertos:5 },
-  { tema:'Água',           emoji:'🌊', fundo:['#7ec8e8','#a8e0f5','#d0f0ff'],
-    animais:['sapo','golfinho','baleia','pinguim','tartaruga'],
-    opcoes:4, acertos:5 },
-  { tema:'Tudo Junto!',    emoji:'🌈', fundo:['#ffb3d9','#ffd9f0','#c8e8ff'],
-    animais: TODOS,
-    opcoes:4, acertos:6 },
-  { tema:'Desafio Final',  emoji:'🏆', fundo:['#ffd966','#ffe9a8','#fff5cc'],
-    animais: TODOS,
-    opcoes:5, acertos:6 }
+  { tema:'Casa I',         visual:'casa',    emoji:'🏡', animais:['gato','cachorro','coelho','passarinho'],                                   opcoes:3, acertos:4 },
+  { tema:'Casa II',        visual:'casa',    emoji:'🏠', animais:['gato','cachorro','coelho','passarinho','peixinho','hamster'],             opcoes:3, acertos:4 },
+  { tema:'Fazenda I',      visual:'fazenda', emoji:'🚜', animais:['vaca','porco','ovelha','galinha'],                                        opcoes:3, acertos:5 },
+  { tema:'Fazenda II',     visual:'fazenda', emoji:'🌾', animais:['vaca','porco','ovelha','galinha','cavalo','pato'],                         opcoes:4, acertos:5 },
+  { tema:'Selva',          visual:'selva',   emoji:'🌴', animais:['leao','elefante','macaco','tigre','panda'],                               opcoes:4, acertos:5 },
+  { tema:'Água',           visual:'agua',    emoji:'🌊', animais:['sapo','golfinho','baleia','pinguim','tartaruga'],                          opcoes:4, acertos:5 },
+  { tema:'Tudo Junto!',    visual:'rainbow', emoji:'🌈', animais: TODOS,                                                                    opcoes:4, acertos:6 },
+  { tema:'Desafio Final',  visual:'trofeu',  emoji:'🏆', animais: TODOS,                                                                    opcoes:5, acertos:6 }
 ];
 
 const POSICOES = {
-  3: [
-    { x: 14, y: 42 },
-    { x: 86, y: 42 },
-    { x: 50, y: 86 }
-  ],
-  4: [
-    { x: 12, y: 40 },
-    { x: 88, y: 40 },
-    { x: 22, y: 84 },
-    { x: 78, y: 84 }
-  ],
-  5: [
-    { x: 12, y: 22 },
-    { x: 88, y: 22 },
-    { x: 10, y: 68 },
-    { x: 90, y: 68 },
-    { x: 50, y: 92 }
-  ]
+  3: [{ x: 14, y: 42 }, { x: 86, y: 42 }, { x: 50, y: 86 }],
+  4: [{ x: 12, y: 40 }, { x: 88, y: 40 }, { x: 22, y: 84 }, { x: 78, y: 84 }],
+  5: [{ x: 12, y: 22 }, { x: 88, y: 22 }, { x: 10, y: 68 }, { x: 90, y: 68 }, { x: 50, y: 92 }]
 };
 const ALVO = { x: 50, y: 35 };
 
@@ -447,7 +476,7 @@ function salvarProgresso(){
 }
 
 /* =========================================================
-   ESTADO GERAL
+   REFERÊNCIAS
    ========================================================= */
 const telaMenu = document.getElementById('telaMenu');
 const telaMapa = document.getElementById('telaMapa');
@@ -456,28 +485,26 @@ const gridFases= document.getElementById('gridFases');
 const jogoTitulo = document.getElementById('jogoTitulo');
 
 const stage     = document.getElementById('stage');
+const decor     = document.getElementById('decor');
 const headsEl   = document.getElementById('heads');
 const bodyWrap  = document.getElementById('bodyWrap');
 const toastEl   = document.getElementById('toast');
 const nomeLabel = document.getElementById('nomeLabel');
 const pipsEl    = document.getElementById('pips');
 const overlay   = document.getElementById('overlay');
-
 const btnSomMenu = document.getElementById('btnSomMenu');
 
 let somLigado = true;
 
-/* fase em execução */
-let faseAtual    = null;   /* { index, config } */
-let acertos      = 0;
-let erros        = 0;
-let atual        = null;   /* animal correto da rodada */
-let ultimoId     = null;
-let travado      = false;
-let animando     = false;
+let faseAtual = null;
+let acertos   = 0;
+let erros     = 0;
+let atual     = null;
+let ultimoId  = null;
+let travado   = false;
 
 /* =========================================================
-   ÁUDIO (jingle)
+   ÁUDIO
    ========================================================= */
 let ctxAudio = null;
 function pegarCtx(){
@@ -576,14 +603,37 @@ function mostrarTela(qual){
 }
 
 /* =========================================================
-   SVG DO CORPO
+   CORPO DO BICHINHO — 5 MODELOS
    ========================================================= */
 function bodySVG(a){
+  const t = a.tipo || 'quadrupede';
+  if (t === 'ave')       return bodyAve(a);
+  if (t === 'peixe')     return bodyPeixe(a);
+  if (t === 'sapo')      return bodySapo(a);
+  if (t === 'tartaruga') return bodyTartaruga(a);
+  return bodyQuadrupede(a);
+}
+
+/* ---- QUADRÚPEDE (gato, cachorro, vaca, cavalo, leão...) ---- */
+function bodyQuadrupede(a){
+  const rabo = a.rabo || 'longo';
+  let raboSVG;
+  if (rabo === 'encaracolado'){
+    raboSVG = `<path d="M95 50 q15 -4 15 -18 q0 -13 -11 -12 q-9 1 -7 9 q2 6 8 4"
+                    fill="none" stroke="${a.escuro}" stroke-width="6"
+                    stroke-linecap="round" opacity=".95"/>`;
+  } else if (rabo === 'curto'){
+    raboSVG = `<circle cx="100" cy="52" r="9" fill="${a.escuro}" opacity=".9"/>
+               <circle cx="100" cy="52" r="5" fill="${a.claro}" opacity=".5"/>`;
+  } else {
+    raboSVG = `<path d="M97 54 q20 -6 16 -26" fill="none"
+                    stroke="${a.escuro}" stroke-width="9"
+                    stroke-linecap="round" opacity=".9"/>`;
+  }
   return `
   <svg viewBox="0 0 120 112" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
     <ellipse cx="60" cy="101" rx="40" ry="6" fill="#000" opacity=".09"/>
-    <path d="M97 54 q20 -6 16 -26" fill="none" stroke="${a.escuro}"
-          stroke-width="9" stroke-linecap="round" opacity=".9"/>
+    ${raboSVG}
     <rect x="26" y="72" width="15" height="24" rx="7" fill="${a.escuro}"/>
     <rect x="46" y="76" width="15" height="20" rx="7" fill="${a.cor}"/>
     <rect x="66" y="76" width="15" height="20" rx="7" fill="${a.cor}"/>
@@ -594,6 +644,131 @@ function bodySVG(a){
     <ellipse cx="60" cy="30" rx="17" ry="11" fill="${a.cor}"
              stroke="${a.escuro}" stroke-opacity=".35" stroke-width="3"/>
   </svg>`;
+}
+
+/* ---- AVE (passarinho, galinha, pato, pinguim) ---- */
+function bodyAve(a){
+  return `
+  <svg viewBox="0 0 120 112" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <ellipse cx="60" cy="101" rx="32" ry="5" fill="#000" opacity=".09"/>
+    <!-- rabo de penas -->
+    <path d="M84 66 L104 56 L100 68 L106 78 L86 80 Z"
+          fill="${a.escuro}" opacity=".9"/>
+    <!-- pernas finas -->
+    <line x1="52" y1="88" x2="52" y2="99" stroke="#E8A030" stroke-width="4" stroke-linecap="round"/>
+    <line x1="68" y1="88" x2="68" y2="99" stroke="#E8A030" stroke-width="4" stroke-linecap="round"/>
+    <path d="M45 99 L52 99 L59 99" fill="none" stroke="#E8A030" stroke-width="3" stroke-linecap="round"/>
+    <path d="M61 99 L68 99 L75 99" fill="none" stroke="#E8A030" stroke-width="3" stroke-linecap="round"/>
+    <!-- corpo redondo -->
+    <ellipse cx="58" cy="62" rx="35" ry="32" fill="${a.cor}"
+             stroke="${a.escuro}" stroke-opacity=".35" stroke-width="3"/>
+    <!-- asa -->
+    <path d="M38 58 q16 -8 30 10 q-14 10 -30 -10 Z"
+          fill="${a.claro}" opacity=".65"/>
+    <path d="M42 62 q10 -2 18 8" fill="none" stroke="${a.escuro}"
+          stroke-opacity=".35" stroke-width="2" stroke-linecap="round"/>
+    <!-- peito claro -->
+    <ellipse cx="58" cy="72" rx="20" ry="14" fill="${a.claro}" opacity=".45"/>
+    <!-- toco do pescoço -->
+    <ellipse cx="58" cy="30" rx="15" ry="10" fill="${a.cor}"
+             stroke="${a.escuro}" stroke-opacity=".35" stroke-width="3"/>
+  </svg>`;
+}
+
+/* ---- PEIXE (peixinho, golfinho, baleia) ---- */
+function bodyPeixe(a){
+  return `
+  <svg viewBox="0 0 120 112" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <ellipse cx="60" cy="99" rx="30" ry="5" fill="#000" opacity=".09"/>
+    <!-- barbatana caudal -->
+    <path d="M94 62 L114 42 L112 62 L114 82 L94 66 Z"
+          fill="${a.escuro}" opacity=".9"/>
+    <!-- barbatana dorsal -->
+    <path d="M48 30 L60 16 L74 30 Z" fill="${a.escuro}" opacity=".85"/>
+    <!-- corpo -->
+    <ellipse cx="58" cy="62" rx="42" ry="28" fill="${a.cor}"
+             stroke="${a.escuro}" stroke-opacity=".35" stroke-width="3"/>
+    <!-- barriga -->
+    <ellipse cx="58" cy="72" rx="30" ry="14" fill="${a.claro}" opacity=".55"/>
+    <!-- barbatana lateral -->
+    <path d="M42 66 q6 12 18 4 q-5 -10 -18 -4 Z" fill="${a.escuro}" opacity=".75"/>
+    <!-- toco do pescoço -->
+    <ellipse cx="60" cy="30" rx="14" ry="10" fill="${a.cor}"
+             stroke="${a.escuro}" stroke-opacity=".35" stroke-width="3"/>
+  </svg>`;
+}
+
+/* ---- SAPO ---- */
+function bodySapo(a){
+  return `
+  <svg viewBox="0 0 120 112" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <ellipse cx="60" cy="101" rx="40" ry="6" fill="#000" opacity=".09"/>
+    <!-- coxas traseiras -->
+    <ellipse cx="24" cy="80" rx="17" ry="13" fill="${a.escuro}" opacity=".9"/>
+    <ellipse cx="96" cy="80" rx="17" ry="13" fill="${a.escuro}" opacity=".9"/>
+    <!-- pezinhos -->
+    <path d="M12 92 q-1 8 6 8 M18 92 q0 8 7 8"
+          fill="none" stroke="${a.escuro}" stroke-width="3" stroke-linecap="round"/>
+    <path d="M95 92 q-1 8 7 8 M101 92 q0 8 7 8"
+          fill="none" stroke="${a.escuro}" stroke-width="3" stroke-linecap="round"/>
+    <!-- patinhas da frente -->
+    <rect x="42" y="82" width="9" height="14" rx="4.5" fill="${a.escuro}"/>
+    <rect x="69" y="82" width="9" height="14" rx="4.5" fill="${a.escuro}"/>
+    <!-- corpo baixo e largo -->
+    <ellipse cx="60" cy="68" rx="46" ry="30" fill="${a.cor}"
+             stroke="${a.escuro}" stroke-opacity=".35" stroke-width="3"/>
+    <!-- barriga clara -->
+    <ellipse cx="60" cy="78" rx="30" ry="14" fill="${a.claro}" opacity=".55"/>
+    <!-- toco do pescoço -->
+    <ellipse cx="60" cy="38" rx="16" ry="10" fill="${a.cor}"
+             stroke="${a.escuro}" stroke-opacity=".35" stroke-width="3"/>
+  </svg>`;
+}
+
+/* ---- TARTARUGA ---- */
+function bodyTartaruga(a){
+  return `
+  <svg viewBox="0 0 120 112" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <ellipse cx="60" cy="101" rx="40" ry="6" fill="#000" opacity=".09"/>
+    <!-- patinhas -->
+    <rect x="16" y="78" width="15" height="18" rx="7.5" fill="${a.escuro}"/>
+    <rect x="42" y="86" width="15" height="14" rx="7.5" fill="${a.escuro}"/>
+    <rect x="63" y="86" width="15" height="14" rx="7.5" fill="${a.escuro}"/>
+    <rect x="89" y="78" width="15" height="18" rx="7.5" fill="${a.escuro}"/>
+    <!-- casco (base) -->
+    <ellipse cx="60" cy="62" rx="48" ry="34" fill="${a.escuro}"/>
+    <!-- casco (topo mais claro) -->
+    <ellipse cx="60" cy="62" rx="42" ry="28" fill="${a.cor}" opacity=".85"/>
+    <!-- desenho do casco -->
+    <path d="M60 40 L60 84 M30 62 L90 62 M40 46 L80 78 M80 46 L40 78"
+          stroke="${a.escuro}" stroke-width="2" opacity=".55" fill="none"/>
+    <ellipse cx="60" cy="62" rx="12" ry="9" fill="${a.claro}" opacity=".55"/>
+    <!-- toco do pescoço -->
+    <ellipse cx="60" cy="28" rx="14" ry="10" fill="${a.claro}"
+             stroke="${a.escuro}" stroke-opacity=".35" stroke-width="3"/>
+  </svg>`;
+}
+
+/* =========================================================
+   CENÁRIO (fundo + decoração)
+   ========================================================= */
+function aplicarTema(visual){
+  const t = TEMAS[visual] || TEMAS.casa;
+  stage.style.background = t.fundo;
+  decor.innerHTML = '';
+  t.decor.forEach(d => {
+    const el = document.createElement('span');
+    el.className = 'decor-item';
+    el.textContent = d.e;
+    el.style.left = d.x + '%';
+    el.style.top  = d.y + '%';
+    el.style.fontSize = d.s + 'px';
+    decor.appendChild(el);
+  });
+}
+function limparTema(){
+  stage.style.background = '';
+  decor.innerHTML = '';
 }
 
 /* =========================================================
@@ -611,7 +786,7 @@ window.addEventListener('orientationchange', () => setTimeout(ajustarUnidade, 12
 /* =========================================================
    MENU / MAPA
    ========================================================= */
-function atualizarEstrelasMenu(){
+function atualizarIconeSom(){
   btnSomMenu.textContent = somLigado ? '🔊' : '🔇';
 }
 
@@ -629,54 +804,47 @@ function montarMapa(){
     if (liberada){
       let estrelasHTML = '';
       for (let k=0;k<3;k++){
-        estrelasHTML += k < estrelas
-          ? '⭐'
-          : '<span class="vazia">⭐</span>';
+        estrelasHTML += k < estrelas ? '⭐' : '<span class="vazia">⭐</span>';
       }
       btn.innerHTML = `
         <div class="num">FASE ${num}</div>
         <div class="emoji">${f.emoji}</div>
         <div class="tema">${f.tema}</div>
-        <div class="estrelas">${estrelasHTML}</div>
-      `;
+        <div class="estrelas">${estrelasHTML}</div>`;
       btn.addEventListener('click', () => abrirFase(num));
     } else {
       btn.innerHTML = `
         <div class="num">FASE ${num}</div>
         <div class="emoji">${f.emoji}</div>
         <div class="tema">${f.tema}</div>
-        <div class="cadeado">🔒</div>
-      `;
+        <div class="cadeado">🔒</div>`;
     }
     gridFases.appendChild(btn);
   });
 }
 
 /* =========================================================
-   ABRIR / INICIAR FASE
+   ABRIR FASE
    ========================================================= */
 function abrirFase(numero){
   const i = Math.max(0, Math.min(FASES.length-1, numero-1));
   faseAtual = { index: i, config: FASES[i] };
 
-  /* aplica cores do fundo */
-  const [c1,c2,c3] = faseAtual.config.fundo;
-  document.body.style.background = `linear-gradient(180deg,${c1} 0%,${c2} 42%,${c3} 100%)`;
+  /* fundo da página acompanha o tema (mais suave) */
+  const visual = faseAtual.config.visual;
+  const tema = TEMAS[visual] || TEMAS.casa;
+  document.body.style.background = tema.fundo;
 
   jogoTitulo.textContent = `Fase ${numero} · ${faseAtual.config.tema}`;
 
-  acertos = 0;
-  erros   = 0;
-  ultimoId = null;
-  atual = null;
-  travado = false;
-  animando = false;
+  acertos = 0; erros = 0; ultimoId = null; atual = null; travado = false;
 
   overlay.classList.add('hidden');
   overlay.innerHTML = '';
 
   mostrarTela('jogo');
-  /* aguarda layout para medir o stage */
+  aplicarTema(visual);
+
   requestAnimationFrame(() => {
     ajustarUnidade();
     iniciarRodada();
@@ -713,7 +881,6 @@ function iniciarRodada(){
 
   bodyWrap.innerHTML = bodySVG(atual);
 
-  /* distratores (n-1) */
   const outrosIds = shuffle(lista.filter(id => id !== idCorreto));
   const qtd = Math.min(faseAtual.config.opcoes, lista.length);
   const idsRodada = [idCorreto, ...outrosIds.slice(0, qtd-1)];
@@ -783,21 +950,17 @@ function ligarArraste(el, animal){
     if (travado) return;
 
     const andou = Math.hypot(dx, dy);
-    if (andou < 12){
-      escolher(el, animal);
-      return;
-    }
+    if (andou < 12){ escolher(el, animal); return; }
+
     const r  = el.getBoundingClientRect();
     const sr = stage.getBoundingClientRect();
     const cx = r.left + r.width/2  - sr.left;
     const cy = r.top  + r.height/2 - sr.top;
     const alvoX = sr.width  * 0.5;
     const alvoY = sr.height * 0.52;
-    if (Math.hypot(cx-alvoX, cy-alvoY) < sr.width * 0.32){
-      escolher(el, animal);
-    } else {
-      voltarAoLugar(el);
-    }
+
+    if (Math.hypot(cx-alvoX, cy-alvoY) < sr.width * 0.32) escolher(el, animal);
+    else voltarAoLugar(el);
   }
 
   el.addEventListener('pointerup', soltar);
@@ -878,7 +1041,7 @@ function mostrarToast(msg){
 }
 
 /* =========================================================
-   EFEITOS VISUAIS
+   EFEITOS
    ========================================================= */
 function explodir(x, y){
   const icones = ['⭐','✨','🌟','💫','⭐'];
@@ -927,7 +1090,6 @@ function terminarFase(){
   const num = faseAtual.index + 1;
   const estrelas = calcularEstrelas(erros);
 
-  /* salva progresso */
   const anterior = progresso.estrelas[num] || 0;
   if (estrelas > anterior) progresso.estrelas[num] = estrelas;
   if (num === progresso.maxFase && num < FASES.length){
@@ -935,18 +1097,13 @@ function terminarFase(){
   }
   salvarProgresso();
 
-  /* UI */
   let estrelasHTML = '';
   for (let k=0;k<3;k++){
-    estrelasHTML += k < estrelas
-      ? '⭐'
-      : '<span class="vazia">⭐</span>';
+    estrelasHTML += k < estrelas ? '⭐' : '<span class="vazia">⭐</span>';
   }
 
   const ultima = num === FASES.length;
-  const btnProxima = (!ultima)
-    ? `<button id="btnProxima">➡️ Próxima fase</button>`
-    : '';
+  const btnProxima = (!ultima) ? `<button id="btnProxima">➡️ Próxima fase</button>` : '';
 
   const titulo = ultima ? '🎖️ Mestre dos Bichinhos!' : 'Parabéns!';
   const msg = ultima
@@ -989,17 +1146,18 @@ function voltarAoMenu(){
   overlay.classList.add('hidden');
   overlay.innerHTML = '';
   document.body.style.background = 'linear-gradient(180deg,#a9e4ff 0%,#cdefff 42%,#d7f5c4 100%)';
+  limparTema();
   mostrarTela('menu');
 }
 
 function abrirMapa(){
   if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+  document.body.style.background = 'linear-gradient(180deg,#a9e4ff 0%,#cdefff 42%,#d7f5c4 100%)';
   montarMapa();
   mostrarTela('mapa');
 }
 
 function comecarJogo(){
-  /* aquece áudio (gesto do usuário) */
   pegarCtx();
   const fase = Math.min(progresso.maxFase, FASES.length);
   abrirFase(fase);
@@ -1017,7 +1175,7 @@ document.getElementById('btnReiniciarFase').addEventListener('click', () => {
 });
 btnSomMenu.addEventListener('click', () => {
   somLigado = !somLigado;
-  atualizarEstrelasMenu();
+  atualizarIconeSom();
   if (!somLigado && 'speechSynthesis' in window) window.speechSynthesis.cancel();
 });
 document.getElementById('btnZerar').addEventListener('click', () => {
@@ -1033,7 +1191,7 @@ document.getElementById('btnZerar').addEventListener('click', () => {
    INÍCIO
    ========================================================= */
 carregarProgresso();
-atualizarEstrelasMenu();
+atualizarIconeSom();
 mostrarTela('menu');
 window.addEventListener('load', () => setTimeout(ajustarUnidade, 60));
 </script>
