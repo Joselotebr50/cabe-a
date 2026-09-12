@@ -31,7 +31,6 @@
     padding:8px 12px 12px;gap:6px;
   }
 
-  /* ---------- topo ---------- */
   header{
     display:flex;align-items:center;justify-content:space-between;
     gap:8px;flex:0 0 auto;
@@ -55,7 +54,6 @@
   button:active{transform:translateY(3px);box-shadow:0 1px 0 #cfe6f2;}
   .icon-btn{padding:7px 11px;font-size:17px;line-height:1;}
 
-  /* ---------- palco ---------- */
   #stage{
     position:relative;
     width:min(100%, calc(100dvh - 160px));
@@ -68,7 +66,6 @@
     touch-action:none;
   }
 
-  /* ---------- corpo do bichinho ---------- */
   #bodyWrap{
     position:absolute;left:50%;top:52%;width:46%;
     transform:translate(-50%,-50%);
@@ -76,7 +73,6 @@
   }
   #bodyWrap svg{width:100%;height:auto;display:block;}
 
-  /* ---------- alvo pontilhado ---------- */
   .target{
     position:absolute;left:50%;top:35%;
     width:calc(var(--hs,70px) * 1.2);
@@ -93,7 +89,6 @@
     50%{transform:translate(-50%,-50%) scale(1.13);opacity:.95;}
   }
 
-  /* ---------- cabeças ---------- */
   #heads{position:absolute;inset:0;pointer-events:none;}
   .head{
     position:absolute;
@@ -122,7 +117,6 @@
     80%{transform:translateX(-5px) rotate(-3deg);}
   }
 
-  /* ---------- aviso ---------- */
   #toast{
     position:absolute;left:50%;top:5%;
     transform:translate(-50%,-14px);
@@ -136,7 +130,6 @@
   }
   #toast.show{opacity:1;transform:translate(-50%,0);}
 
-  /* ---------- efeitos ---------- */
   .spark{
     position:absolute;pointer-events:none;z-index:35;
     animation:voar .85s ease-out forwards;
@@ -154,7 +147,6 @@
     to{top:112%;opacity:0;transform:rotate(420deg);}
   }
 
-  /* ---------- vitória ---------- */
   #overlay{
     position:absolute;inset:0;z-index:60;
     display:flex;align-items:center;justify-content:center;
@@ -202,9 +194,6 @@
 </div>
 
 <script>
-/* =========================================================
-   DADOS DOS ANIMAIS
-   ========================================================= */
 const ANIMAIS = [
   { id:'gato',     emoji:'🐱', nome:'Gato',     cor:'#F2A25C', escuro:'#D9833A', claro:'#FFD9B0', som:'Miau! Miau!'      },
   { id:'cachorro', emoji:'🐶', nome:'Cachorro', cor:'#C99A66', escuro:'#A87A48', claro:'#EBC9A3', som:'Au au! Au au!'    },
@@ -216,15 +205,12 @@ const ANIMAIS = [
 
 const TOTAL_RODADA = 5;
 const POSICOES = [
-  { x: 14, y: 42 },   // esquerda
-  { x: 86, y: 42 },   // direita
-  { x: 50, y: 86 }    // baixo
+  { x: 14, y: 42 },
+  { x: 86, y: 42 },
+  { x: 50, y: 86 }
 ];
-const ALVO = { x: 50, y: 35 };   // onde a cabeça encaixa
+const ALVO = { x: 50, y: 35 };
 
-/* =========================================================
-   ESTADO
-   ========================================================= */
 const stage    = document.getElementById('stage');
 const headsEl  = document.getElementById('heads');
 const bodyWrap = document.getElementById('bodyWrap');
@@ -239,9 +225,6 @@ let ultimoId  = null;
 let travado   = false;
 let somLigado = true;
 
-/* =========================================================
-   UTILITÁRIOS
-   ========================================================= */
 const rand = n => Math.floor(Math.random() * n);
 function shuffle(arr){
   for (let i = arr.length - 1; i > 0; i--){
@@ -251,9 +234,6 @@ function shuffle(arr){
   return arr;
 }
 
-/* =========================================================
-   DESENHO DO CORPO (SVG)
-   ========================================================= */
 function bodySVG(a){
   return `
   <svg viewBox="0 0 120 112" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -272,9 +252,6 @@ function bodySVG(a){
   </svg>`;
 }
 
-/* =========================================================
-   SOM — jingles (Web Audio)
-   ========================================================= */
 let ctxAudio = null;
 function pegarCtx(){
   if (!ctxAudio){
@@ -309,14 +286,10 @@ function tocarErro(){
   nota(220, 0.17, 0.30, 'triangle', 0.13);
 }
 
-/* =========================================================
-   SOM — voz do bichinho (Web Speech)
-   ========================================================= */
-let vozesCarregadas = false;
 function prepararVozes(){
   if (!('speechSynthesis' in window)) return;
   window.speechSynthesis.getVoices();
-  window.speechSynthesis.onvoiceschanged = () => { vozesCarregadas = true; };
+  window.speechSynthesis.onvoiceschanged = () => {};
 }
 prepararVozes();
 
@@ -333,12 +306,9 @@ function falar(texto){
     const v = vozes.find(v => /pt[-_]?BR/i.test(v.lang)) || vozes.find(v => /^pt/i.test(v.lang));
     if (v) u.voice = v;
     window.speechSynthesis.speak(u);
-  }catch(e){/* silencioso */}
+  }catch(e){}
 }
 
-/* =========================================================
-   TAMANHO DAS CABEÇAS (responsivo)
-   ========================================================= */
 function ajustarUnidade(){
   const w = stage.clientWidth || 320;
   stage.style.setProperty('--hs', (w * 0.22) + 'px');
@@ -346,9 +316,6 @@ function ajustarUnidade(){
 window.addEventListener('resize', ajustarUnidade);
 window.addEventListener('orientationchange', () => setTimeout(ajustarUnidade, 120));
 
-/* =========================================================
-   PLACAR (estrelinhas)
-   ========================================================= */
 function atualizarPips(){
   pipsEl.innerHTML = '';
   for (let i = 0; i < TOTAL_RODADA; i++){
@@ -359,9 +326,6 @@ function atualizarPips(){
   }
 }
 
-/* =========================================================
-   RODADA
-   ========================================================= */
 function iniciarRodada(){
   travado = false;
   headsEl.innerHTML = '';
@@ -369,15 +333,12 @@ function iniciarRodada(){
   overlay.classList.add('hidden');
   overlay.innerHTML = '';
 
-  // escolhe o bichinho da vez (sem repetir o anterior)
   const pool = ANIMAIS.filter(a => a.id !== ultimoId);
   atual = pool[rand(pool.length)];
   ultimoId = atual.id;
 
-  // desenha o corpo sem cabeça
   bodyWrap.innerHTML = bodySVG(atual);
 
-  // monta as 3 opções
   const outros = shuffle(ANIMAIS.filter(a => a.id !== atual.id));
   const opcoes = shuffle([atual, outros[0], outros[1]]);
 
@@ -405,9 +366,6 @@ function iniciarRodada(){
   atualizarPips();
 }
 
-/* =========================================================
-   ARRASTAR / TOCAR
-   ========================================================= */
 function ligarArraste(el, animal){
   let arrastando = false;
   let pid = null;
@@ -448,13 +406,11 @@ function ligarArraste(el, animal){
 
     const andou = Math.hypot(dx, dy);
 
-    // toque simples (sem arrastar) = escolher
     if (andou < 12){
       escolher(el, animal);
       return;
     }
 
-    // soltou perto do corpo?
     const r  = el.getBoundingClientRect();
     const sr = stage.getBoundingClientRect();
     const cx = r.left + r.width / 2 - sr.left;
@@ -465,7 +421,7 @@ function ligarArraste(el, animal){
     if (Math.hypot(cx - alvoX, cy - alvoY) < sr.width * 0.32){
       escolher(el, animal);
     } else {
-      voltarAo lugar(el);
+      voltarAoLugar(el);
     }
   }
 
@@ -473,14 +429,11 @@ function ligarArraste(el, animal){
   el.addEventListener('pointercancel', soltar);
 }
 
-function voltarAo lugar(el){
+function voltarAoLugar(el){
   el.style.setProperty('--dx', '0px');
   el.style.setProperty('--dy', '0px');
 }
 
-/* =========================================================
-   ESCOLHA
-   ========================================================= */
 function escolher(el, animal){
   if (travado) return;
   travado = true;
@@ -498,18 +451,15 @@ function acertou(el){
 
   el.style.transition =
     'transform .42s cubic-bezier(.34,1.56,.64,1), opacity .3s';
-  void el.offsetWidth;                       // força reflow p/ animar
+  void el.offsetWidth;
   el.style.zIndex = '12';
   el.style.setProperty('--dx', tx + 'px');
   el.style.setProperty('--dy', ty + 'px');
 
-  // some com as outras cabeças
   [...headsEl.children].forEach(h => { if (h !== el) h.classList.add('esconder'); });
 
-  // estrelinhas
   explodir(sr.width * (ALVO.x / 100), sr.height * (ALVO.y / 100));
 
-  // sons
   tocarAcerto();
   setTimeout(() => falar(atual.som), 340);
 
@@ -525,7 +475,7 @@ function acertou(el){
 function errou(el){
   tocarErro();
   mostrarToast('Ops! Tente de novo! 🙈');
-  voltarAo lugar(el);
+  voltarAoLugar(el);
 
   const inner = el.querySelector('.head-inner');
   inner.classList.add('shake');
@@ -534,9 +484,6 @@ function errou(el){
   setTimeout(() => { travado = false; }, 700);
 }
 
-/* =========================================================
-   AVISO
-   ========================================================= */
 let toastTimer = null;
 function mostrarToast(msg){
   toastEl.textContent = msg;
@@ -545,9 +492,6 @@ function mostrarToast(msg){
   toastTimer = setTimeout(() => toastEl.classList.remove('show'), 1700);
 }
 
-/* =========================================================
-   EFEITOS VISUAIS
-   ========================================================= */
 function explodir(x, y){
   const icones = ['⭐','✨','🌟','💫','⭐'];
   for (let i = 0; i < 9; i++){
@@ -582,9 +526,6 @@ function soltarConfete(){
   }
 }
 
-/* =========================================================
-   VITÓRIA
-   ========================================================= */
 function mostrarVitoria(){
   overlay.innerHTML = `
     <div class="win-card">
@@ -602,9 +543,6 @@ function mostrarVitoria(){
   soltarConfete();
 }
 
-/* =========================================================
-   REINICIAR
-   ========================================================= */
 function reiniciar(){
   if ('speechSynthesis' in window) window.speechSynthesis.cancel();
   acertos  = 0;
@@ -618,23 +556,16 @@ function reiniciar(){
 
 document.getElementById('btnReiniciar').addEventListener('click', reiniciar);
 
-/* =========================================================
-   BOTÃO DE SOM
-   ========================================================= */
 btnSom.addEventListener('click', () => {
   somLigado = !somLigado;
   btnSom.textContent = somLigado ? '🔊' : '🔇';
   if (!somLigado && 'speechSynthesis' in window) window.speechSynthesis.cancel();
 });
 
-/* =========================================================
-   INÍCIO
-   ========================================================= */
 ajustarUnidade();
 atualizarPips();
 iniciarRodada();
 
-// pequena folga para o layout estabilizar em celulares
 window.addEventListener('load', () => setTimeout(ajustarUnidade, 60));
 </script>
 </body>
