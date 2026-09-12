@@ -130,12 +130,12 @@ function mostrarTela(q){
 /* ---------- PRÉ-CARREGAR IMAGENS ---------- */
 function preloadImagens(){
   Object.keys(ANIMAIS).forEach(id => {
-    new Image().src = `imagens/${id}/corpo.png`;
-    new Image().src = `imagens/${id}/cabeca.png`;
+    new Image().src = `imagens/${id}_corpo.png`;
+    new Image().src = `imagens/${id}_cabeca.png`;
   });
 }
 
-/* ---------- CORPO DO BICHINHO ---------- */
+/* ---------- CORPO DO BICHINHO (SVG fallback) ---------- */
 function bodySVG(a){
   const t = a.tipo || 'quadrupede';
   if (t === 'ave')       return bodyAve(a);
@@ -225,21 +225,18 @@ function aplicarTema(visual){
   const t = TEMAS[visual] || TEMAS.casa;
   const caminho = `fundos/${visual}.jpg`;
 
-  /* aplica gradiente primeiro (fallback) */
   stage.style.backgroundImage = t.fundo;
   decor.innerHTML = '';
 
-  /* tenta carregar a imagem de fundo */
   const img = new Image();
   img.onload = () => {
     stage.style.backgroundImage = `url('${caminho}')`;
     stage.style.backgroundSize = 'cover';
     stage.style.backgroundPosition = 'center';
     stage.style.backgroundRepeat = 'no-repeat';
-    decor.innerHTML = '';   /* sem ícones quando tem imagem */
+    decor.innerHTML = '';
   };
   img.onerror = () => {
-    /* sem imagem → mantém gradiente + ícones */
     stage.style.backgroundImage = t.fundo;
     stage.style.backgroundSize = '';
     stage.style.backgroundPosition = '';
@@ -347,14 +344,14 @@ function iniciarRodada(){
   atual = { id: idCorreto, ...ANIMAIS[idCorreto] };
   ultimoId = idCorreto;
 
-  /* tenta imagem do corpo; fallback SVG */
+  /* corpo: tenta imagem, senão SVG */
   bodyWrap.innerHTML = '';
   const imgCorpo = new Image();
   imgCorpo.alt = '';
   imgCorpo.draggable = false;
   imgCorpo.onload = () => { bodyWrap.innerHTML = ''; bodyWrap.appendChild(imgCorpo); };
   imgCorpo.onerror = () => { bodyWrap.innerHTML = bodySVG(atual); };
-  imgCorpo.src = `imagens/${atual.id}/corpo.png`;
+  imgCorpo.src = `imagens/${atual.id}_corpo.png`;
 
   const outrosIds = shuffle(lista.filter(id => id !== idCorreto));
   const qtd = Math.min(faseAtual.config.opcoes, lista.length);
@@ -376,14 +373,13 @@ function iniciarRodada(){
 
     const inner = document.createElement('div');
     inner.className = 'head-inner';
-    inner.textContent = animal.emoji;   /* fallback imediato */
+    inner.textContent = animal.emoji;
 
-    /* tenta imagem da cabeça */
     const imgC = new Image();
     imgC.alt = '';
     imgC.draggable = false;
     imgC.onload = () => { inner.textContent = ''; inner.appendChild(imgC); };
-    imgC.src = `imagens/${animal.id}/cabeca.png`;
+    imgC.src = `imagens/${animal.id}_cabeca.png`;
 
     el.appendChild(inner);
     headsEl.appendChild(el);
@@ -491,13 +487,9 @@ function acertou(el){
   acertos++;
   atualizarPips();
 
-  /* ============================================================
-     AQUI ESTÁ A CORREÇÃO DO "AU AU" VAZANDO:
-     só avança para a próxima rodada DEPOIS que o áudio terminar
-     ============================================================ */
+  /* espera o áudio terminar antes de trocar de rodada */
   setTimeout(() => {
     falarNomeESom(atual.id, atual.nome, atual.som, () => {
-      /* pequena pausa após o áudio para respirar */
       setTimeout(() => {
         if (acertos >= faseAtual.config.acertos) terminarFase();
         else iniciarRodada();
