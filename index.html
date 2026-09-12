@@ -119,6 +119,31 @@
     80%{transform:translateX(-5px) rotate(-3deg);}
   }
 
+  /* Etiqueta do nome do bichinho */
+  #nomeLabel{
+    position:absolute;left:50%;top:80%;
+    transform:translate(-50%,-50%) scale(.4);
+    background:#fff;color:var(--azul);
+    padding:8px 22px;border-radius:999px;
+    font-weight:800;
+    font-size:clamp(18px,5.6vw,26px);
+    letter-spacing:1px;text-transform:uppercase;
+    white-space:nowrap;
+    box-shadow:0 6px 0 #cfe6f2, 0 12px 24px #5aa9d640;
+    opacity:0;pointer-events:none;z-index:40;
+    transition:opacity .28s, transform .38s cubic-bezier(.34,1.56,.64,1);
+  }
+  #nomeLabel.show{
+    opacity:1;
+    transform:translate(-50%,-50%) scale(1);
+    animation:balance .5s ease-in-out .38s;
+  }
+  @keyframes balance{
+    0%,100%{transform:translate(-50%,-50%) scale(1) rotate(0);}
+    25%{transform:translate(-50%,-50%) scale(1.06) rotate(-2deg);}
+    75%{transform:translate(-50%,-50%) scale(1.06) rotate(2deg);}
+  }
+
   #toast{
     position:absolute;left:50%;top:5%;
     transform:translate(-50%,-14px);
@@ -186,6 +211,7 @@
     <div class="target" aria-hidden="true"></div>
     <div id="bodyWrap"></div>
     <div id="heads"></div>
+    <div id="nomeLabel" aria-live="polite"></div>
     <div id="toast" role="status"></div>
     <div id="overlay" class="hidden"></div>
   </main>
@@ -213,13 +239,14 @@ const POSICOES = [
 ];
 const ALVO = { x: 50, y: 35 };
 
-const stage    = document.getElementById('stage');
-const headsEl  = document.getElementById('heads');
-const bodyWrap = document.getElementById('bodyWrap');
-const toastEl  = document.getElementById('toast');
-const pipsEl   = document.getElementById('pips');
-const overlay  = document.getElementById('overlay');
-const btnSom   = document.getElementById('btnSom');
+const stage     = document.getElementById('stage');
+const headsEl   = document.getElementById('heads');
+const bodyWrap  = document.getElementById('bodyWrap');
+const toastEl   = document.getElementById('toast');
+const nomeLabel = document.getElementById('nomeLabel');
+const pipsEl    = document.getElementById('pips');
+const overlay   = document.getElementById('overlay');
+const btnSom    = document.getElementById('btnSom');
 
 let acertos   = 0;
 let atual     = null;
@@ -254,6 +281,7 @@ function bodySVG(a){
   </svg>`;
 }
 
+/* ---------- ÁUDIO (jingle) ---------- */
 let ctxAudio = null;
 function pegarCtx(){
   if (!ctxAudio){
@@ -288,6 +316,7 @@ function tocarErro(){
   nota(220, 0.17, 0.30, 'triangle', 0.13);
 }
 
+/* ---------- VOZ ---------- */
 function prepararVozes(){
   if (!('speechSynthesis' in window)) return;
   window.speechSynthesis.getVoices();
@@ -295,22 +324,56 @@ function prepararVozes(){
 }
 prepararVozes();
 
+function acharVozBR(){
+  const vozes = window.speechSynthesis.getVoices() || [];
+  return vozes.find(v => /pt[-_]?BR/i.test(v.lang))
+      || vozes.find(v => /^pt/i.test(v.lang))
+      || null;
+}
+
+function criarFala(texto, pitch = 1.3, rate = 0.9){
+  const u = new SpeechSynthesisUtterance(texto);
+  u.lang = 'pt-BR';
+  u.rate = rate;
+  u.pitch = pitch;
+  u.volume = 1;
+  const v = acharVozBR();
+  if (v) u.voice = v;
+  return u;
+}
+
+/* fala uma coisa só (usado na vitória) */
 function falar(texto){
   if (!somLigado || !('speechSynthesis' in window)) return;
   try{
     window.speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(texto);
-    u.lang = 'pt-BR';
-    u.rate = 0.92;
-    u.pitch = 1.35;
-    u.volume = 1;
-    const vozes = window.speechSynthesis.getVoices() || [];
-    const v = vozes.find(v => /pt[-_]?BR/i.test(v.lang)) || vozes.find(v => /^pt/i.test(v.lang));
-    if (v) u.voice = v;
-    window.speechSynthesis.speak(u);
+    window.speechSynthesis.speak(criarFala(texto));
   }catch(e){}
 }
 
+/* fala o NOME e depois o SOM do bichinho */
+function falarNomeESom(nome, som){
+  if (!somLigado || !('speechSynthesis' in window)) return;
+  try{
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(criarFala(nome + '!', 1.25, 0.85));
+    window.speechSynthesis.speak(criarFala(som,       1.45, 0.9));
+  }catch(e){}
+}
+
+/* ---------- VISUAL DO NOME ---------- */
+function mostrarNome(animal){
+  nomeLabel.textContent = animal.emoji + ' ' + animal.nome.toUpperCase();
+  // reinicia a animação
+  nomeLabel.classList.remove('show');
+  void nomeLabel.offsetWidth;
+  nomeLabel.classList.add('show');
+}
+function esconderNome(){
+  nomeLabel.classList.remove('show');
+}
+
+/* ---------- LAYOUT ---------- */
 function ajustarUnidade(){
   const w = stage.clientWidth || 320;
   stage.style.setProperty('--hs', (w * 0.22) + 'px');
@@ -318,6 +381,7 @@ function ajustarUnidade(){
 window.addEventListener('resize', ajustarUnidade);
 window.addEventListener('orientationchange', () => setTimeout(ajustarUnidade, 120));
 
+/* ---------- PLACAR ---------- */
 function atualizarPips(){
   pipsEl.innerHTML = '';
   for (let i = 0; i < TOTAL_RODADA; i++){
@@ -328,10 +392,12 @@ function atualizarPips(){
   }
 }
 
+/* ---------- RODADA ---------- */
 function iniciarRodada(){
   travado = false;
   headsEl.innerHTML = '';
   toastEl.classList.remove('show');
+  esconderNome();
   overlay.classList.add('hidden');
   overlay.innerHTML = '';
 
@@ -368,6 +434,7 @@ function iniciarRodada(){
   atualizarPips();
 }
 
+/* ---------- ARRASTAR / TOCAR ---------- */
 function ligarArraste(el, animal){
   let arrastando = false;
   let pid = null;
@@ -436,6 +503,7 @@ function voltarAoLugar(el){
   el.style.setProperty('--dy', '0px');
 }
 
+/* ---------- ESCOLHA ---------- */
 function escolher(el, animal){
   if (travado) return;
   travado = true;
@@ -463,15 +531,21 @@ function acertou(el){
   explodir(sr.width * (ALVO.x / 100), sr.height * (ALVO.y / 100));
 
   tocarAcerto();
-  setTimeout(() => falar(atual.som), 340);
+
+  // Mostra o nome com animação logo que a cabeça encaixa
+  setTimeout(() => mostrarNome(atual), 260);
+
+  // Fala o nome e, em seguida, o som do bichinho
+  setTimeout(() => falarNomeESom(atual.nome, atual.som), 560);
 
   acertos++;
   atualizarPips();
 
+  // dá tempo de mostrar o nome e ouvir a fala antes de trocar de bichinho
   setTimeout(() => {
     if (acertos >= TOTAL_RODADA) mostrarVitoria();
     else iniciarRodada();
-  }, 2200);
+  }, 2900);
 }
 
 function errou(el){
@@ -486,6 +560,7 @@ function errou(el){
   setTimeout(() => { travado = false; }, 700);
 }
 
+/* ---------- AVISO ---------- */
 let toastTimer = null;
 function mostrarToast(msg){
   toastEl.textContent = msg;
@@ -494,6 +569,7 @@ function mostrarToast(msg){
   toastTimer = setTimeout(() => toastEl.classList.remove('show'), 1700);
 }
 
+/* ---------- EFEITOS ---------- */
 function explodir(x, y){
   const icones = ['⭐','✨','🌟','💫','⭐'];
   for (let i = 0; i < 9; i++){
@@ -528,6 +604,7 @@ function soltarConfete(){
   }
 }
 
+/* ---------- VITÓRIA ---------- */
 function mostrarVitoria(){
   overlay.innerHTML = `
     <div class="win-card">
@@ -545,6 +622,7 @@ function mostrarVitoria(){
   soltarConfete();
 }
 
+/* ---------- REINICIAR ---------- */
 function reiniciar(){
   if ('speechSynthesis' in window) window.speechSynthesis.cancel();
   acertos  = 0;
@@ -555,19 +633,19 @@ function reiniciar(){
   overlay.innerHTML = '';
   iniciarRodada();
 }
-
 document.getElementById('btnReiniciar').addEventListener('click', reiniciar);
 
+/* ---------- BOTÃO DE SOM ---------- */
 btnSom.addEventListener('click', () => {
   somLigado = !somLigado;
   btnSom.textContent = somLigado ? '🔊' : '🔇';
   if (!somLigado && 'speechSynthesis' in window) window.speechSynthesis.cancel();
 });
 
+/* ---------- INÍCIO ---------- */
 ajustarUnidade();
 atualizarPips();
 iniciarRodada();
-
 window.addEventListener('load', () => setTimeout(ajustarUnidade, 60));
 </script>
 </body>
