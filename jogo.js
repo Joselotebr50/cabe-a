@@ -29,7 +29,7 @@ const ANIMAIS = {
 };
 const TODOS = Object.keys(ANIMAIS);
 
-/* ---------- TEMAS (fallback quando não há imagem) ---------- */
+/* ---------- TEMAS ---------- */
 const TEMAS = {
   casa:    { fundo:'linear-gradient(180deg,#c8e8ff 0%,#e0f0ff 42%,#d8f0b8 100%)', decor:[
               { e:'🏡', x:10, y:14, s:50 }, { e:'🌳', x:91, y:15, s:46 },
@@ -135,7 +135,7 @@ function preloadImagens(){
   });
 }
 
-/* ---------- CORPO DO BICHINHO (SVG fallback) ---------- */
+/* ---------- CORPO SVG (fallback) ---------- */
 function bodySVG(a){
   const t = a.tipo || 'quadrupede';
   if (t === 'ave')       return bodyAve(a);
@@ -220,7 +220,7 @@ function bodyTartaruga(a){
   </svg>`;
 }
 
-/* ---------- TEMA (fundo + decoração) ---------- */
+/* ---------- TEMA ---------- */
 function aplicarTema(visual){
   const t = TEMAS[visual] || TEMAS.casa;
   const caminho = `fundos/${visual}.jpg`;
@@ -258,7 +258,7 @@ function limparTema(){
   decor.innerHTML = '';
 }
 
-/* ---------- TAMANHO DAS CABEÇAS ---------- */
+/* ---------- TAMANHO ---------- */
 function ajustarUnidade(){
   const w = stage.clientWidth || 320;
   const n = faseAtual ? faseAtual.config.opcoes : 3;
@@ -344,7 +344,6 @@ function iniciarRodada(){
   atual = { id: idCorreto, ...ANIMAIS[idCorreto] };
   ultimoId = idCorreto;
 
-  /* corpo: tenta imagem, senão SVG */
   bodyWrap.innerHTML = '';
   const imgCorpo = new Image();
   imgCorpo.alt = '';
@@ -472,6 +471,12 @@ function acertou(el){
   el.style.setProperty('--dx', tx+'px');
   el.style.setProperty('--dy', ty+'px');
 
+  /* espera o voo e remove o círculo (380ms, dentro dos 420ms do voo) */
+  setTimeout(() => {
+    const inner = el.querySelector('.head-inner');
+    if (inner) inner.classList.add('encaixada');
+  }, 380);
+
   [...headsEl.children].forEach(h => { if (h !== el) h.classList.add('esconder'); });
 
   explodir(sr.width * (ALVO.x/100), sr.height * (ALVO.y/100));
@@ -487,7 +492,6 @@ function acertou(el){
   acertos++;
   atualizarPips();
 
-  /* espera o áudio terminar antes de trocar de rodada */
   setTimeout(() => {
     falarNomeESom(atual.id, atual.nome, atual.som, () => {
       setTimeout(() => {
