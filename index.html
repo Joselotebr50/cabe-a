@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#a9e4ff">
+<title>Cabeça de Animais 🐾</title>
+<style>
+  :root{
+    --amarelo:#ffc93c;
+    --azul:#1f6f9c;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    font-family:'Baloo 2','Comic Sans MS','Chalkboard SE','Segoe UI',system-ui,-apple-system,sans-serif;
+    background:linear-gradient(180deg,#a9e4ff 0%,#cdefff 42%,#d7f5c4 100%);
+    color:#2c3e50;
+    display:flex;justify-content:center;
+    overflow:hidden;
+    user-select:none;-webkit-user-select:none;
+    -webkit-tap-highlight-color:transparent;
+    touch-action:manipulation;
+  }
+
+  .app{
+    width:100%;max-width:540px;
+    height:100dvh;height:100vh;
+    display:flex;flex-direction:column;
+    padding:8px 12px 12px;gap:6px;
+  }
+
+  /* ---------- topo ---------- */
+  header{
+    display:flex;align-items:center;justify-content:space-between;
+    gap:8px;flex:0 0 auto;
+  }
+  h1{
+    font-size:clamp(14px,4vw,19px);margin:0;
+    color:var(--azul);text-shadow:0 2px 0 #fff;
+    white-space:nowrap;
+  }
+  .pips{display:flex;gap:2px;font-size:clamp(13px,3.6vw,17px);}
+  .pip{opacity:.25;filter:grayscale(1);transition:opacity .25s,filter .25s,transform .25s;}
+  .pip.done{opacity:1;filter:none;transform:scale(1.15);}
+
+  button{
+    font-family:inherit;font-weight:700;cursor:pointer;border:none;
+    border-radius:999px;background:#fff;color:var(--azul);
+    box-shadow:0 4px 0 #cfe6f2, 0 6px 14px #5aa9d633;
+    padding:9px 18px;font-size:15px;
+    transition:transform .1s, box-shadow .1s;
+  }
+  button:active{transform:translateY(3px);box-shadow:0 1px 0 #cfe6f2;}
+  .icon-btn{padding:7px 11px;font-size:17px;line-height:1;}
+
+  /* ---------- palco ---------- */
+  #stage{
+    position:relative;
+    width:min(100%, calc(100dvh - 160px));
+    width:min(100%, calc(100vh - 160px));
+    aspect-ratio:1/1;
+    margin:0 auto;flex:0 0 auto;
+    border-radius:30px;
+    background:radial-gradient(circle at 50% 38%, #ffffffdd, #ffffff66 62%, #ffffff22 100%);
+    box-shadow:inset 0 0 0 3px #ffffff99, 0 10px 26px #5aa9d62e;
+    touch-action:none;
+  }
+
+  /* ---------- corpo do bichinho ---------- */
+  #bodyWrap{
+    position:absolute;left:50%;top:52%;width:46%;
+    transform:translate(-50%,-50%);
+    pointer-events:none;
+  }
+  #bodyWrap svg{width:100%;height:auto;display:block;}
+
+  /* ---------- alvo pontilhado ---------- */
+  .target{
+    position:absolute;left:50%;top:35%;
+    width:calc(var(--hs,70px) * 1.2);
+    height:calc(var(--hs,70px) * 1.2);
+    border-radius:50%;
+    border:3px dashed #ffffffdd;
+    box-shadow:0 0 18px #ffffffaa inset;
+    transform:translate(-50%,-50%);
+    animation:pulsa 2s ease-in-out infinite;
+    pointer-events:none;z-index:1;
+  }
+  @keyframes pulsa{
+    0%,100%{transform:translate(-50%,-50%) scale(1);opacity:.45;}
+    50%{transform:translate(-50%,-50%) scale(1.13);opacity:.95;}
+  }
+
+  /* ---------- cabeças ---------- */
+  #heads{position:absolute;inset:0;pointer-events:none;}
+  .head{
+    position:absolute;
+    width:var(--hs,70px);height:var(--hs,70px);
+    transform:translate(-50%,-50%) translate(var(--dx,0px),var(--dy,0px)) scale(var(--s,1));
+    transition:transform .35s cubic-bezier(.34,1.56,.64,1), opacity .3s;
+    cursor:grab;touch-action:none;z-index:5;
+    will-change:transform;
+  }
+  .head.dragging{cursor:grabbing;z-index:25;transition:none;}
+  .head.esconder{opacity:0;transform:translate(-50%,-50%) scale(.4);}
+  .head-inner{
+    width:100%;height:100%;border-radius:50%;
+    background:radial-gradient(circle at 34% 28%, #ffffff, #ffefc9 72%);
+    box-shadow:0 6px 0 #e8cc8f, 0 10px 18px #00000024, inset 0 -4px 10px #00000012;
+    display:flex;align-items:center;justify-content:center;
+    font-size:calc(var(--hs,70px) * .6);line-height:1;
+    pointer-events:none;
+    -webkit-user-drag:none;
+  }
+  .head-inner.shake{animation:tremer .5s;}
+  @keyframes tremer{
+    0%,100%{transform:translateX(0) rotate(0);}
+    20%{transform:translateX(-9px) rotate(-7deg);}
+    50%{transform:translateX(9px) rotate(7deg);}
+    80%{transform:translateX(-5px) rotate(-3deg);}
+  }
+
+  /* ---------- aviso ---------- */
+  #toast{
+    position:absolute;left:50%;top:5%;
+    transform:translate(-50%,-14px);
+    background:#fff;color:#d64545;
+    padding:9px 18px;border-radius:999px;
+    font-weight:700;font-size:clamp(13px,3.6vw,16px);
+    text-align:center;max-width:90%;
+    box-shadow:0 8px 20px #00000022, inset 0 0 0 3px #ffe1e1;
+    opacity:0;pointer-events:none;z-index:50;
+    transition:opacity .25s, transform .25s;
+  }
+  #toast.show{opacity:1;transform:translate(-50%,0);}
+
+  /* ---------- efeitos ---------- */
+  .spark{
+    position:absolute;pointer-events:none;z-index:35;
+    animation:voar .85s ease-out forwards;
+  }
+  @keyframes voar{
+    0%{transform:translate(-50%,-50%) scale(.3);opacity:0;}
+    30%{opacity:1;}
+    100%{transform:translate(calc(-50% + var(--tx)),calc(-50% + var(--ty))) scale(1.15);opacity:0;}
+  }
+  .confete{
+    position:absolute;top:-40px;pointer-events:none;z-index:55;
+    animation:cair linear forwards;
+  }
+  @keyframes cair{
+    to{top:112%;opacity:0;transform:rotate(420deg);}
+  }
+
+  /* ---------- vitória ---------- */
+  #overlay{
+    position:absolute;inset:0;z-index:60;
+    display:flex;align-items:center;justify-content:center;
+    background:#ffffffd9;border-radius:30px;
+    transition:opacity .25s;
+  }
+  #overlay.hidden{opacity:0;pointer-events:none;}
+  .win-card{
+    text-align:center;padding:18px 24px 22px;background:#fff;
+    border-radius:26px;box-shadow:0 14px 34px #00000026;
+    animation:popin .45s cubic-bezier(.34,1.56,.64,1);
+    max-width:90%;
+  }
+  @keyframes popin{from{transform:scale(.65);opacity:0}to{transform:scale(1);opacity:1}}
+  .win-card .trofeu{font-size:56px;line-height:1;animation:pulsa 1.4s ease-in-out infinite;}
+  .win-card h2{margin:8px 0 4px;color:var(--azul);font-size:clamp(20px,6vw,28px);}
+  .win-card p{margin:0 0 6px;font-size:clamp(13px,3.8vw,16px);color:#5b7285;}
+  .win-card .estrelas{font-size:clamp(20px,6vw,28px);letter-spacing:2px;margin-bottom:14px;}
+
+  footer{
+    margin-top:auto;display:flex;justify-content:center;
+    flex:0 0 auto;padding-bottom:2px;
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <h1>🐾 Cabeça de Animais</h1>
+    <div class="pips" id="pips"></div>
+    <button class="icon-btn" id="btnSom" aria-label="Ligar ou desligar som">🔊</button>
+  </header>
+
+  <main id="stage">
+    <div class="target" aria-hidden="true"></div>
+    <div id="bodyWrap"></div>
+    <div id="heads"></div>
+    <div id="toast" role="status"></div>
+    <div id="overlay" class="hidden"></div>
+  </main>
+
+  <footer>
+    <button id="btnReiniciar">🔄 Começar de novo</button>
+  </footer>
+</div>
+
+<script>
+/* =========================================================
+   DADOS DOS ANIMAIS
+   ========================================================= */
+const ANIMAIS = [
+  { id:'gato',     emoji:'🐱', nome:'Gato',     cor:'#F2A25C', escuro:'#D9833A', claro:'#FFD9B0', som:'Miau! Miau!'      },
+  { id:'cachorro', emoji:'🐶', nome:'Cachorro', cor:'#C99A66', escuro:'#A87A48', claro:'#EBC9A3', som:'Au au! Au au!'    },
+  { id:'vaca',     emoji:'🐮', nome:'Vaca',     cor:'#F3EEE4', escuro:'#4A4A4A', claro:'#FFFFFF', som:'Muuu! Muuu!'      },
+  { id:'porco',    emoji:'🐷', nome:'Porco',    cor:'#F5A8C0', escuro:'#DE7F9E', claro:'#FFD3E0', som:'Oinc! Oinc!'      },
+  { id:'sapo',     emoji:'🐸', nome:'Sapo',     cor:'#7BC85C', escuro:'#5AA23C', claro:'#B6E89B', som:'Croac! Croac!'    },
+  { id:'ovelha',   emoji:'🐑', nome:'Ovelha',   cor:'#F0EBE1', escuro:'#C4B9A5', claro:'#FFFFFF', som:'Bééé! Bééé!'      }
+];
+
+const TOTAL_RODADA = 5;
+const POSICOES = [
+  { x: 14, y: 42 },   // esquerda
+  { x: 86, y: 42 },   // direita
+  { x: 50, y: 86 }    // baixo
+];
+const ALVO = { x: 50, y: 35 };   // onde a cabeça encaixa
+
+/* =========================================================
+   ESTADO
+   ========================================================= */
+const stage    = document.getElementById('stage');
+const headsEl  = document.getElementById('heads');
+const bodyWrap = document.getElementById('bodyWrap');
+const toastEl  = document.getElementById('toast');
+const pipsEl   = document.getElementById('pips');
+const overlay  = document.getElementById('overlay');
+const btnSom   = document.getElementById('btnSom');
+
+let acertos   = 0;
+let atual     = null;
+let ultimoId  = null;
+let travado   = false;
+let somLigado = true;
+
+/* =========================================================
+   UTILITÁRIOS
+   ========================================================= */
+const rand = n => Math.floor(Math.random() * n);
+function shuffle(arr){
+  for (let i = arr.length - 1; i > 0; i--){
+    const j = rand(i + 1);
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+/* =========================================================
+   DESENHO DO CORPO (SVG)
+   ========================================================= */
+function bodySVG(a){
+  return `
+  <svg viewBox="0 0 120 112" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <ellipse cx="60" cy="101" rx="40" ry="6" fill="#000" opacity=".09"/>
+    <path d="M97 54 q20 -6 16 -26" fill="none" stroke="${a.escuro}"
+          stroke-width="9" stroke-linecap="round" opacity=".9"/>
+    <rect x="26" y="72" width="15" height="24" rx="7" fill="${a.escuro}"/>
+    <rect x="46" y="76" width="15" height="20" rx="7" fill="${a.cor}"/>
+    <rect x="66" y="76" width="15" height="20" rx="7" fill="${a.cor}"/>
+    <rect x="84" y="72" width="15" height="24" rx="7" fill="${a.escuro}"/>
+    <ellipse cx="60" cy="60" rx="45" ry="33" fill="${a.cor}"
+             stroke="${a.escuro}" stroke-opacity=".35" stroke-width="3"/>
+    <ellipse cx="60" cy="70" rx="28" ry="18" fill="${a.claro}" opacity=".5"/>
+    <ellipse cx="60" cy="30" rx="17" ry="11" fill="${a.cor}"
+             stroke="${a.escuro}" stroke-opacity=".35" stroke-width="3"/>
+  </svg>`;
+}
+
+/* =========================================================
+   SOM — jingles (Web Audio)
+   ========================================================= */
+let ctxAudio = null;
+function pegarCtx(){
+  if (!ctxAudio){
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return null;
+    ctxAudio = new AC();
+  }
+  if (ctxAudio.state === 'suspended') ctxAudio.resume();
+  return ctxAudio;
+}
+function nota(freq, inicio, dur, tipo = 'triangle', vol = 0.16){
+  if (!somLigado) return;
+  const c = pegarCtx(); if (!c) return;
+  const t0 = c.currentTime + inicio;
+  const o = c.createOscillator();
+  const g = c.createGain();
+  o.type = tipo;
+  o.frequency.setValueAtTime(freq, t0);
+  g.gain.setValueAtTime(0.0001, t0);
+  g.gain.linearRampToValueAtTime(vol, t0 + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t0); o.stop(t0 + dur + 0.06);
+}
+function tocarAcerto(){
+  nota(523.25, 0.00, 0.18);
+  nota(659.25, 0.11, 0.18);
+  nota(783.99, 0.22, 0.34);
+}
+function tocarErro(){
+  nota(294, 0.00, 0.20, 'triangle', 0.13);
+  nota(220, 0.17, 0.30, 'triangle', 0.13);
+}
+
+/* =========================================================
+   SOM — voz do bichinho (Web Speech)
+   ========================================================= */
+let vozesCarregadas = false;
+function prepararVozes(){
+  if (!('speechSynthesis' in window)) return;
+  window.speechSynthesis.getVoices();
+  window.speechSynthesis.onvoiceschanged = () => { vozesCarregadas = true; };
+}
+prepararVozes();
+
+function falar(texto){
+  if (!somLigado || !('speechSynthesis' in window)) return;
+  try{
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(texto);
+    u.lang = 'pt-BR';
+    u.rate = 0.92;
+    u.pitch = 1.35;
+    u.volume = 1;
+    const vozes = window.speechSynthesis.getVoices() || [];
+    const v = vozes.find(v => /pt[-_]?BR/i.test(v.lang)) || vozes.find(v => /^pt/i.test(v.lang));
+    if (v) u.voice = v;
+    window.speechSynthesis.speak(u);
+  }catch(e){/* silencioso */}
+}
+
+/* =========================================================
+   TAMANHO DAS CABEÇAS (responsivo)
+   ========================================================= */
+function ajustarUnidade(){
+  const w = stage.clientWidth || 320;
+  stage.style.setProperty('--hs', (w * 0.22) + 'px');
+}
+window.addEventListener('resize', ajustarUnidade);
+window.addEventListener('orientationchange', () => setTimeout(ajustarUnidade, 120));
+
+/* =========================================================
+   PLACAR (estrelinhas)
+   ========================================================= */
+function atualizarPips(){
+  pipsEl.innerHTML = '';
+  for (let i = 0; i < TOTAL_RODADA; i++){
+    const s = document.createElement('span');
+    s.className = 'pip' + (i < acertos ? ' done' : '');
+    s.textContent = '⭐';
+    pipsEl.appendChild(s);
+  }
+}
+
+/* =========================================================
+   RODADA
+   ========================================================= */
+function iniciarRodada(){
+  travado = false;
+  headsEl.innerHTML = '';
+  toastEl.classList.remove('show');
+  overlay.classList.add('hidden');
+  overlay.innerHTML = '';
+
+  // escolhe o bichinho da vez (sem repetir o anterior)
+  const pool = ANIMAIS.filter(a => a.id !== ultimoId);
+  atual = pool[rand(pool.length)];
+  ultimoId = atual.id;
+
+  // desenha o corpo sem cabeça
+  bodyWrap.innerHTML = bodySVG(atual);
+
+  // monta as 3 opções
+  const outros = shuffle(ANIMAIS.filter(a => a.id !== atual.id));
+  const opcoes = shuffle([atual, outros[0], outros[1]]);
+
+  opcoes.forEach((animal, i) => {
+    const el = document.createElement('div');
+    el.className = 'head';
+    el.dataset.animal = animal.id;
+    el.dataset.bx = POSICOES[i].x;
+    el.dataset.by = POSICOES[i].y;
+    el.style.left = POSICOES[i].x + '%';
+    el.style.top  = POSICOES[i].y + '%';
+    el.style.setProperty('--s', '0');
+    el.style.opacity = '0';
+    el.innerHTML = `<div class="head-inner">${animal.emoji}</div>`;
+    headsEl.appendChild(el);
+
+    ligarArraste(el, animal);
+
+    setTimeout(() => {
+      el.style.opacity = '1';
+      el.style.setProperty('--s', '1');
+    }, 60 + i * 90);
+  });
+
+  atualizarPips();
+}
+
+/* =========================================================
+   ARRASTAR / TOCAR
+   ========================================================= */
+function ligarArraste(el, animal){
+  let arrastando = false;
+  let pid = null;
+  let sx = 0, sy = 0, dx = 0, dy = 0;
+
+  el.addEventListener('pointerdown', e => {
+    if (travado) return;
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    e.preventDefault();
+
+    pid = e.pointerId;
+    try { el.setPointerCapture(pid); } catch(_){}
+
+    arrastando = true;
+    sx = e.clientX; sy = e.clientY;
+    dx = 0; dy = 0;
+    el.classList.add('dragging');
+    el.style.transition = 'none';
+  });
+
+  el.addEventListener('pointermove', e => {
+    if (!arrastando || e.pointerId !== pid) return;
+    e.preventDefault();
+    dx = e.clientX - sx;
+    dy = e.clientY - sy;
+    el.style.setProperty('--dx', dx + 'px');
+    el.style.setProperty('--dy', dy + 'px');
+  });
+
+  function soltar(e){
+    if (!arrastando || e.pointerId !== pid) return;
+    arrastando = false;
+    pid = null;
+    el.classList.remove('dragging');
+    el.style.transition = '';
+
+    if (travado) return;
+
+    const andou = Math.hypot(dx, dy);
+
+    // toque simples (sem arrastar) = escolher
+    if (andou < 12){
+      escolher(el, animal);
+      return;
+    }
+
+    // soltou perto do corpo?
+    const r  = el.getBoundingClientRect();
+    const sr = stage.getBoundingClientRect();
+    const cx = r.left + r.width / 2 - sr.left;
+    const cy = r.top  + r.height / 2 - sr.top;
+    const alvoX = sr.width * 0.5;
+    const alvoY = sr.height * 0.52;
+
+    if (Math.hypot(cx - alvoX, cy - alvoY) < sr.width * 0.32){
+      escolher(el, animal);
+    } else {
+      voltarAo lugar(el);
+    }
+  }
+
+  el.addEventListener('pointerup', soltar);
+  el.addEventListener('pointercancel', soltar);
+}
+
+function voltarAo lugar(el){
+  el.style.setProperty('--dx', '0px');
+  el.style.setProperty('--dy', '0px');
+}
+
+/* =========================================================
+   ESCOLHA
+   ========================================================= */
+function escolher(el, animal){
+  if (travado) return;
+  travado = true;
+
+  if (animal.id === atual.id) acertou(el);
+  else errou(el);
+}
+
+function acertou(el){
+  const sr = stage.getBoundingClientRect();
+  const bx = parseFloat(el.dataset.bx) / 100 * sr.width;
+  const by = parseFloat(el.dataset.by) / 100 * sr.height;
+  const tx = sr.width  * (ALVO.x / 100) - bx;
+  const ty = sr.height * (ALVO.y / 100) - by;
+
+  el.style.transition =
+    'transform .42s cubic-bezier(.34,1.56,.64,1), opacity .3s';
+  void el.offsetWidth;                       // força reflow p/ animar
+  el.style.zIndex = '12';
+  el.style.setProperty('--dx', tx + 'px');
+  el.style.setProperty('--dy', ty + 'px');
+
+  // some com as outras cabeças
+  [...headsEl.children].forEach(h => { if (h !== el) h.classList.add('esconder'); });
+
+  // estrelinhas
+  explodir(sr.width * (ALVO.x / 100), sr.height * (ALVO.y / 100));
+
+  // sons
+  tocarAcerto();
+  setTimeout(() => falar(atual.som), 340);
+
+  acertos++;
+  atualizarPips();
+
+  setTimeout(() => {
+    if (acertos >= TOTAL_RODADA) mostrarVitoria();
+    else iniciarRodada();
+  }, 2200);
+}
+
+function errou(el){
+  tocarErro();
+  mostrarToast('Ops! Tente de novo! 🙈');
+  voltarAo lugar(el);
+
+  const inner = el.querySelector('.head-inner');
+  inner.classList.add('shake');
+  setTimeout(() => inner.classList.remove('shake'), 540);
+
+  setTimeout(() => { travado = false; }, 700);
+}
+
+/* =========================================================
+   AVISO
+   ========================================================= */
+let toastTimer = null;
+function mostrarToast(msg){
+  toastEl.textContent = msg;
+  toastEl.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toastEl.classList.remove('show'), 1700);
+}
+
+/* =========================================================
+   EFEITOS VISUAIS
+   ========================================================= */
+function explodir(x, y){
+  const icones = ['⭐','✨','🌟','💫','⭐'];
+  for (let i = 0; i < 9; i++){
+    const s = document.createElement('span');
+    s.className = 'spark';
+    s.textContent = icones[rand(icones.length)];
+    const ang = (Math.PI * 2 * i / 9) + Math.random() * 0.6;
+    const d = 55 + Math.random() * 70;
+    s.style.left = x + 'px';
+    s.style.top  = y + 'px';
+    s.style.fontSize = (15 + Math.random() * 16) + 'px';
+    s.style.setProperty('--tx', (Math.cos(ang) * d).toFixed(1) + 'px');
+    s.style.setProperty('--ty', (Math.sin(ang) * d).toFixed(1) + 'px');
+    stage.appendChild(s);
+    setTimeout(() => s.remove(), 900);
+  }
+}
+
+function soltarConfete(){
+  const icones = ['🎉','⭐','✨','🎈','🌈','🍀'];
+  for (let i = 0; i < 28; i++){
+    setTimeout(() => {
+      const s = document.createElement('span');
+      s.className = 'confete';
+      s.textContent = icones[rand(icones.length)];
+      s.style.left = (Math.random() * 96 + 2) + '%';
+      s.style.fontSize = (14 + Math.random() * 20) + 'px';
+      s.style.animationDuration = (1.7 + Math.random() * 1.3) + 's';
+      stage.appendChild(s);
+      setTimeout(() => s.remove(), 3400);
+    }, i * 70);
+  }
+}
+
+/* =========================================================
+   VITÓRIA
+   ========================================================= */
+function mostrarVitoria(){
+  overlay.innerHTML = `
+    <div class="win-card">
+      <div class="trofeu">🏆</div>
+      <h2>Parabéns!</h2>
+      <p>Você deu cabeça para todos os bichinhos!</p>
+      <div class="estrelas">⭐⭐⭐⭐⭐</div>
+      <button id="btnDeNovo">🔁 Jogar de novo</button>
+    </div>`;
+  overlay.classList.remove('hidden');
+  document.getElementById('btnDeNovo').addEventListener('click', reiniciar);
+
+  tocarAcerto();
+  setTimeout(() => falar('Parabéns! Você acertou todos!'), 500);
+  soltarConfete();
+}
+
+/* =========================================================
+   REINICIAR
+   ========================================================= */
+function reiniciar(){
+  if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+  acertos  = 0;
+  ultimoId = null;
+  atual    = null;
+  travado  = false;
+  overlay.classList.add('hidden');
+  overlay.innerHTML = '';
+  iniciarRodada();
+}
+
+document.getElementById('btnReiniciar').addEventListener('click', reiniciar);
+
+/* =========================================================
+   BOTÃO DE SOM
+   ========================================================= */
+btnSom.addEventListener('click', () => {
+  somLigado = !somLigado;
+  btnSom.textContent = somLigado ? '🔊' : '🔇';
+  if (!somLigado && 'speechSynthesis' in window) window.speechSynthesis.cancel();
+});
+
+/* =========================================================
+   INÍCIO
+   ========================================================= */
+ajustarUnidade();
+atualizarPips();
+iniciarRodada();
+
+// pequena folga para o layout estabilizar em celulares
+window.addEventListener('load', () => setTimeout(ajustarUnidade, 60));
+</script>
+</body>
+</html>
