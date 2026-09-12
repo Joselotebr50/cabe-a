@@ -258,4 +258,4 @@ button{font-family:inherit;font-weight:700;cursor:pointer;border:none;}
 .win-card .acoes button:active{transform:translateY(3px);box-shadow:0 1px 0 #c78a00;}
 .win-card .acoes button.sec{background:#fff;color:#1f6f9c;box-shadow:0 4px 0 #cfe6f2, 0 8px 18px #5aa9d633;}
 .win-card .acoes button.sec:active{box-shadow:0 1px 0 #cfe6f2;}
-.head[data-animal="gato"] .head-inner img, .head[data-animal="tigre"] .head-inner img, .head[data-animal="elefante"] .head-inner img { transform: scale(1.3); }
+.head[data-animal="gato"] .head-inner img, .head[data-animal="tigre"] .head-inner img, .head[data-animal="elefante"] .head-inner img { transform: scale(2); }
