@@ -1,0 +1,17 @@
+{
+  "name": "Cabeça de Animais",
+  "short_name": "Cabeça",
+  "description": "Jogo educativo para crianças aprenderem os animais",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "portrait",
+  "background_color": "#a9e4ff",
+  "theme_color": "#1f6f9c",
+  "lang": "pt-BR",
+  "icons": [
+    { "src": "icones/icone-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icones/icone-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icones/icone-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
