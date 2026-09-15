@@ -23,7 +23,6 @@ button{font-family:inherit;font-weight:700;cursor:pointer;border:none;}
 }
 .tela.hidden{opacity:0;pointer-events:none;}
 
-/* ===== TOPBAR ===== */
 .topbar{display:flex;align-items:center;justify-content:space-between;gap:8px;flex:0 0 auto;}
 .topbar h2{
   font-size:clamp(15px,4.2vw,20px);margin:0;color:#1f6f9c;
@@ -40,7 +39,6 @@ button{font-family:inherit;font-weight:700;cursor:pointer;border:none;}
 .icon-btn:active{transform:translateY(3px);box-shadow:0 1px 0 #cfe6f2;}
 .spacer{width:38px;}
 
-/* ===== MENU ===== */
 #telaMenu{align-items:center;justify-content:center;text-align:center;gap:18px;}
 .menu-hero{display:flex;flex-direction:column;align-items:center;gap:6px;}
 .menu-hero .logo{font-size:70px;line-height:1;animation:pulsa 2.5s ease-in-out infinite;}
@@ -62,7 +60,6 @@ button{font-family:inherit;font-weight:700;cursor:pointer;border:none;}
 .btn-mini{background:transparent;color:#8497a5;font-size:13px;padding:6px 10px;border-radius:10px;box-shadow:none;}
 .btn-mini:hover{background:#ffffff88;}
 
-/* ===== MAPA ===== */
 .grid-fases{
   flex:1;min-height:0;overflow-y:auto;
   display:grid;grid-template-columns:repeat(2,1fr);
@@ -86,7 +83,6 @@ button{font-family:inherit;font-weight:700;cursor:pointer;border:none;}
 .fase-card.bloqueada .emoji{filter:grayscale(1) opacity(.6);}
 .fase-card.bloqueada .cadeado{font-size:22px;color:#9aabba;}
 
-/* ===== JOGO ===== */
 .pips{display:flex;justify-content:center;gap:4px;padding:2px 0;font-size:18px;flex:0 0 auto;}
 .pip{opacity:.22;filter:grayscale(1);transition:all .25s;}
 .pip.done{opacity:1;filter:none;transform:scale(1.18);}
@@ -164,16 +160,8 @@ button{font-family:inherit;font-weight:700;cursor:pointer;border:none;}
   transition:transform .25s;
 }
 
-/* quando a cabeça acerta e encaixa, perde o círculo */
-.head-inner.encaixada{
-  background:transparent;
-  box-shadow:none;
-}
-.head-inner.encaixada img{
-  width:100%;
-  height:100%;
-  transform:scale(1.05);
-}
+.head-inner.encaixada{ background:transparent; box-shadow:none; }
+.head-inner.encaixada img{ width:100%; height:100%; transform:scale(1.05); }
 
 .head-inner.shake{animation:tremer .5s;}
 @keyframes tremer{
@@ -188,7 +176,7 @@ button{font-family:inherit;font-weight:700;cursor:pointer;border:none;}
   transform:translate(-50%,-50%) scale(.4);
   background:#fff;color:#1f6f9c;
   padding:8px 22px;border-radius:999px;
-  font-weight:800;font-size:clamp(18px,5.6vw,26px);
+  font-weight:800;font-size:clamp(16px,5vw,24px);
   letter-spacing:1px;text-transform:uppercase;white-space:nowrap;
   box-shadow:0 6px 0 #cfe6f2, 0 12px 24px #5aa9d640;
   opacity:0;pointer-events:none;z-index:40;
@@ -202,6 +190,22 @@ button{font-family:inherit;font-weight:700;cursor:pointer;border:none;}
   0%,100%{transform:translate(-50%,-50%) scale(1) rotate(0);}
   25%{transform:translate(-50%,-50%) scale(1.06) rotate(-2deg);}
   75%{transform:translate(-50%,-50%) scale(1.06) rotate(2deg);}
+}
+
+/* letra destacada no nome do bicho ("G de GATO") */
+#nomeLabel .letra-destaque{
+  display:inline-block;
+  font-size:1.45em;
+  color:#ffbb1a;
+  text-shadow:0 2px 0 #c78a00, 0 0 8px #ffbb1a66;
+  margin-right:6px;
+  vertical-align:-3px;
+  animation:letraPula .6s ease-in-out;
+}
+@keyframes letraPula{
+  0%  { transform:scale(.5) rotate(-15deg); }
+  60% { transform:scale(1.25) rotate(8deg); }
+  100%{ transform:scale(1) rotate(0); }
 }
 
 #toast{
@@ -225,6 +229,19 @@ button{font-family:inherit;font-weight:700;cursor:pointer;border:none;}
 }
 .confete{position:absolute;top:-40px;pointer-events:none;z-index:55;animation:cair linear forwards;}
 @keyframes cair{to{top:112%;opacity:0;transform:rotate(420deg);}}
+
+/* bichinho "acena" ao acertar */
+@keyframes acena{
+  0%  { transform: translate(-50%,-50%) rotate(0deg)   scale(1); }
+  20% { transform: translate(-50%,-50%) rotate(-7deg)  scale(1.08); }
+  40% { transform: translate(-50%,-50%) rotate(7deg)   scale(1.08); }
+  60% { transform: translate(-50%,-50%) rotate(-5deg)  scale(1.06); }
+  80% { transform: translate(-50%,-50%) rotate(5deg)   scale(1.06); }
+  100%{ transform: translate(-50%,-50%) rotate(0deg)   scale(1); }
+}
+#bodyWrap.acenando{
+  animation: acena .75s ease-in-out;
+}
 
 #overlay{
   position:absolute;inset:0;z-index:60;

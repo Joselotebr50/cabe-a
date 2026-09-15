@@ -1,8 +1,9 @@
 /* ============================================================
    jogo.js — lógica do jogo
+   Lote 1: vibração, bloquear rotação, aceno, confete temático,
+   letra em destaque
    ============================================================ */
 
-/* ---------- ANIMAIS ---------- */
 const ANIMAIS = {
   gato:       { emoji:'🐱', nome:'Gato',       cor:'#F2A25C', escuro:'#D9833A', claro:'#FFD9B0', som:'Miau! Miau!',    tipo:'quadrupede', rabo:'longo' },
   cachorro:   { emoji:'🐶', nome:'Cachorro',   cor:'#C99A66', escuro:'#A87A48', claro:'#EBC9A3', som:'Au au! Au au!',  tipo:'quadrupede', rabo:'longo' },
@@ -29,7 +30,6 @@ const ANIMAIS = {
 };
 const TODOS = Object.keys(ANIMAIS);
 
-/* ---------- TEMAS ---------- */
 const TEMAS = {
   casa:    { fundo:'linear-gradient(180deg,#c8e8ff 0%,#e0f0ff 42%,#d8f0b8 100%)', decor:[
               { e:'🏡', x:10, y:14, s:50 }, { e:'🌳', x:91, y:15, s:46 },
@@ -56,7 +56,16 @@ const TEMAS = {
               { e:'✨', x:50, y:6, s:24 } ] }
 };
 
-/* ---------- FASES ---------- */
+/* Confete temático por cenário */
+const CONFETE_TEMA = {
+  casa:    ['🏠','🌷','💛','🌻','⭐','✨'],
+  fazenda: ['🌾','🌻','🚜','🍀','⭐','🐴'],
+  selva:   ['🍃','🌿','🍂','🦋','⭐','🐒'],
+  agua:    ['🫧','💧','🐚','🐠','⭐','🌊'],
+  rainbow: ['🌈','✨','🎈','💖','⭐','🎉'],
+  trofeu:  ['🏆','👑','🥇','✨','⭐','🎖️']
+};
+
 const FASES = [
   { tema:'Casa I',        visual:'casa',    emoji:'🏡', animais:['gato','cachorro','coelho','passarinho'],                        opcoes:3, acertos:4 },
   { tema:'Casa II',       visual:'casa',    emoji:'🏠', animais:['gato','cachorro','coelho','passarinho','peixinho','hamster'],  opcoes:3, acertos:4 },
@@ -75,7 +84,6 @@ const POSICOES = {
 };
 const ALVO = { x:50, y:35 };
 
-/* ---------- PROGRESSO ---------- */
 const STORAGE_KEY = 'cabecaAnimais.progresso.v1';
 let progresso = { maxFase: 1, estrelas: {} };
 
@@ -97,7 +105,6 @@ function salvarProgresso(){
   try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(progresso)); }catch(e){}
 }
 
-/* ---------- REFERÊNCIAS ---------- */
 const telaMenu = document.getElementById('telaMenu');
 const telaMapa = document.getElementById('telaMapa');
 const telaJogo = document.getElementById('telaJogo');
@@ -113,12 +120,10 @@ const pipsEl    = document.getElementById('pips');
 const overlay   = document.getElementById('overlay');
 const btnSomMenu = document.getElementById('btnSomMenu');
 
-/* ---------- ESTADO ---------- */
 let faseAtual = null;
 let acertos = 0, erros = 0;
 let atual = null, ultimoId = null, travado = false;
 
-/* ---------- HELPERS ---------- */
 const rand = n => Math.floor(Math.random()*n);
 function shuffle(a){ for (let i=a.length-1;i>0;i--){ const j=rand(i+1);[a[i],a[j]]=[a[j],a[i]];} return a; }
 function mostrarTela(q){
@@ -127,15 +132,41 @@ function mostrarTela(q){
   telaJogo.classList.toggle('hidden', q !== 'jogo');
 }
 
-/* ---------- PRÉ-CARREGAR IMAGENS ---------- */
-function preloadImagens(){
-  Object.keys(ANIMAIS).forEach(id => {
+/* ---------- VIBRAÇÃO ---------- */
+function vibrar(padrao){
+  if (!('vibrate' in navigator)) return;
+  try{ navigator.vibrate(padrao); }catch(e){}
+}
+
+/* ---------- BLOQUEAR ROTAÇÃO ---------- */
+function tentarBloquearRotacao(){
+  try{
+    if (screen.orientation && screen.orientation.lock){
+      screen.orientation.lock('portrait').catch(()=>{});
+    }
+  }catch(e){}
+}
+
+/* ---------- PRÉ-CARREGAR ---------- */
+function preloadFase(){
+  if (!faseAtual) return;
+  faseAtual.config.animais.forEach(id => {
     new Image().src = `imagens/${id}_corpo.png`;
     new Image().src = `imagens/${id}_cabeca.png`;
   });
 }
+function preloadProximaFase(){
+  const proxima = faseAtual ? faseAtual.index + 1 : 0;
+  if (!FASES[proxima]) return;
+  setTimeout(() => {
+    FASES[proxima].animais.forEach(id => {
+      new Image().src = `imagens/${id}_corpo.png`;
+      new Image().src = `imagens/${id}_cabeca.png`;
+    });
+  }, 3000);
+}
 
-/* ---------- CORPO SVG (fallback) ---------- */
+/* ---------- SVG FALLBACK ---------- */
 function bodySVG(a){
   const t = a.tipo || 'quadrupede';
   if (t === 'ave')       return bodyAve(a);
@@ -220,7 +251,6 @@ function bodyTartaruga(a){
   </svg>`;
 }
 
-/* ---------- TEMA ---------- */
 function aplicarTema(visual){
   const t = TEMAS[visual] || TEMAS.casa;
   const caminho = `fundos/${visual}.jpg`;
@@ -258,7 +288,6 @@ function limparTema(){
   decor.innerHTML = '';
 }
 
-/* ---------- TAMANHO ---------- */
 function ajustarUnidade(){
   const w = stage.clientWidth || 320;
   const n = faseAtual ? faseAtual.config.opcoes : 3;
@@ -268,7 +297,6 @@ function ajustarUnidade(){
 window.addEventListener('resize', ajustarUnidade);
 window.addEventListener('orientationchange', () => setTimeout(ajustarUnidade, 120));
 
-/* ---------- MENU / MAPA ---------- */
 function atualizarIconeSom(){ btnSomMenu.textContent = somLigado ? '🔊' : '🔇'; }
 
 function montarMapa(){
@@ -293,7 +321,6 @@ function montarMapa(){
   });
 }
 
-/* ---------- ABRIR FASE ---------- */
 function abrirFase(numero){
   const i = Math.max(0, Math.min(FASES.length-1, numero-1));
   faseAtual = { index: i, config: FASES[i] };
@@ -315,6 +342,8 @@ function abrirFase(numero){
   requestAnimationFrame(() => {
     ajustarUnidade();
     iniciarRodada();
+    preloadFase();
+    preloadProximaFase();
   });
 }
 
@@ -329,7 +358,6 @@ function atualizarPips(){
   }
 }
 
-/* ---------- RODADA ---------- */
 function iniciarRodada(){
   travado = false;
   headsEl.innerHTML = '';
@@ -337,6 +365,7 @@ function iniciarRodada(){
   nomeLabel.classList.remove('show');
   overlay.classList.add('hidden');
   overlay.innerHTML = '';
+  bodyWrap.classList.remove('acenando');
 
   const lista = faseAtual.config.animais;
   const pool = lista.filter(id => id !== ultimoId);
@@ -394,7 +423,6 @@ function iniciarRodada(){
   ajustarUnidade();
 }
 
-/* ---------- ARRASTAR ---------- */
 function ligarArraste(el, animal){
   let arrastando = false, pid = null;
   let sx=0, sy=0, dx=0, dy=0;
@@ -450,7 +478,6 @@ function voltarAoLugar(el){
   el.style.setProperty('--dy','0px');
 }
 
-/* ---------- ESCOLHA ---------- */
 function escolher(el, animal){
   if (travado) return;
   travado = true;
@@ -471,19 +498,31 @@ function acertou(el){
   el.style.setProperty('--dx', tx+'px');
   el.style.setProperty('--dy', ty+'px');
 
-  /* espera o voo e remove o círculo (380ms, dentro dos 420ms do voo) */
   setTimeout(() => {
     const inner = el.querySelector('.head-inner');
     if (inner) inner.classList.add('encaixada');
   }, 380);
+
+  /* bichinho acena ao receber a cabeça */
+  setTimeout(() => {
+    bodyWrap.classList.remove('acenando');
+    void bodyWrap.offsetWidth;
+    bodyWrap.classList.add('acenando');
+    setTimeout(() => bodyWrap.classList.remove('acenando'), 800);
+  }, 400);
+
+  /* vibração de acerto (curta) */
+  vibrar(35);
 
   [...headsEl.children].forEach(h => { if (h !== el) h.classList.add('esconder'); });
 
   explodir(sr.width * (ALVO.x/100), sr.height * (ALVO.y/100));
   tocarAcerto();
 
+  /* etiqueta com letra em destaque: "G de GATO" */
   setTimeout(() => {
-    nomeLabel.textContent = atual.emoji + ' ' + atual.nome.toUpperCase();
+    const letra = atual.nome.charAt(0).toUpperCase();
+    nomeLabel.innerHTML = `${atual.emoji} <span class="letra-destaque">${letra}</span> de ${atual.nome.toUpperCase()}`;
     nomeLabel.classList.remove('show');
     void nomeLabel.offsetWidth;
     nomeLabel.classList.add('show');
@@ -505,6 +544,7 @@ function acertou(el){
 function errou(el){
   erros++;
   tocarErro();
+  vibrar([70, 50, 70]);   /* vibração dupla de erro */
   mostrarToast('Ops! Tente de novo! 🙈');
   voltarAoLugar(el);
   const inner = el.querySelector('.head-inner');
@@ -513,7 +553,6 @@ function errou(el){
   setTimeout(() => { travado = false; }, 700);
 }
 
-/* ---------- AVISO ---------- */
 let toastTimer = null;
 function mostrarToast(msg){
   toastEl.textContent = msg;
@@ -522,7 +561,6 @@ function mostrarToast(msg){
   toastTimer = setTimeout(() => toastEl.classList.remove('show'), 1700);
 }
 
-/* ---------- EFEITOS ---------- */
 function explodir(x, y){
   const ic = ['⭐','✨','🌟','💫','⭐'];
   for (let i=0;i<9;i++){
@@ -540,8 +578,11 @@ function explodir(x, y){
     setTimeout(() => s.remove(), 900);
   }
 }
+
+/* Confete temático por cenário */
 function soltarConfete(){
-  const ic = ['🎉','⭐','✨','🎈','🌈','🍀'];
+  const visual = faseAtual ? faseAtual.config.visual : 'casa';
+  const ic = CONFETE_TEMA[visual] || CONFETE_TEMA.casa;
   for (let i=0;i<28;i++){
     setTimeout(() => {
       const s = document.createElement('span');
@@ -556,7 +597,6 @@ function soltarConfete(){
   }
 }
 
-/* ---------- FIM DE FASE ---------- */
 function calcularEstrelas(e){ return e === 0 ? 3 : e <= 2 ? 2 : 1; }
 
 function terminarFase(){
@@ -591,6 +631,7 @@ function terminarFase(){
   overlay.classList.remove('hidden');
 
   tocarFanfarra();
+  vibrar([60, 40, 60, 40, 120]);
   setTimeout(() => {
     falar(ultima ? 'Parabéns! Você virou Mestre dos Bichinhos!' : 'Parabéns! Você completou a fase!');
   }, 700);
@@ -602,7 +643,6 @@ function terminarFase(){
   document.getElementById('btnMenu').addEventListener('click', voltarAoMenu);
 }
 
-/* ---------- NAVEGAÇÃO ---------- */
 function voltarAoMenu(){
   pararAudio();
   overlay.classList.add('hidden');
@@ -619,10 +659,11 @@ function abrirMapa(){
 }
 function comecarJogo(){
   pegarCtx();
+  if (!estaTelaCheia()) entrarTelaCheia();
+  tentarBloquearRotacao();
   abrirFase(Math.min(progresso.maxFase, FASES.length));
 }
 
-/* ---------- BOTÕES ---------- */
 document.getElementById('btnJogar').addEventListener('click', comecarJogo);
 document.getElementById('btnEscolher').addEventListener('click', abrirMapa);
 document.getElementById('btnMapaVoltar').addEventListener('click', voltarAoMenu);
@@ -643,9 +684,60 @@ document.getElementById('btnZerar').addEventListener('click', () => {
   }
 });
 
+/* ---------- TELA CHEIA ---------- */
+function estaTelaCheia(){
+  return !!(document.fullscreenElement ||
+            document.webkitFullscreenElement ||
+            document.msFullscreenElement);
+}
+function entrarTelaCheia(){
+  const el = document.documentElement;
+  const req = el.requestFullscreen ||
+              el.webkitRequestFullscreen ||
+              el.msRequestFullscreen;
+  if (req){
+    try{
+      const p = req.call(el);
+      if (p && p.catch) p.catch(()=>{});
+    }catch(e){}
+    setTimeout(tentarBloquearRotacao, 300);
+  }
+}
+function sairTelaCheia(){
+  const exit = document.exitFullscreen ||
+               document.webkitExitFullscreen ||
+               document.msExitFullscreen;
+  if (exit){
+    try{
+      const p = exit.call(document);
+      if (p && p.catch) p.catch(()=>{});
+    }catch(e){}
+  }
+}
+function alternarTelaCheia(){
+  if (estaTelaCheia()) sairTelaCheia();
+  else entrarTelaCheia();
+}
+function atualizarIconeTelaCheia(){
+  const btn = document.getElementById('btnTelaCheia');
+  if (btn) btn.textContent = estaTelaCheia() ? '🗗' : '⛶';
+}
+
+const suportaTelaCheia = !!(
+  document.documentElement.requestFullscreen ||
+  document.documentElement.webkitRequestFullscreen
+);
+if (!suportaTelaCheia){
+  const b = document.getElementById('btnTelaCheia');
+  if (b) b.style.display = 'none';
+}
+['fullscreenchange','webkitfullscreenchange','msfullscreenchange']
+  .forEach(ev => document.addEventListener(ev, atualizarIconeTelaCheia));
+const btnTC = document.getElementById('btnTelaCheia');
+if (btnTC) btnTC.addEventListener('click', alternarTelaCheia);
+
 /* ---------- INÍCIO ---------- */
 carregarProgresso();
 atualizarIconeSom();
 mostrarTela('menu');
-preloadImagens();
 window.addEventListener('load', () => setTimeout(ajustarUnidade, 60));
