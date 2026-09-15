@@ -1,23 +1,11 @@
 /* ============================================================
-   audio.js — todo o som do jogo
-   ============================================================
-
-   ARQUIVOS DE VOZ (opcional, para você subir depois):
-     audios/{idAnimal}.mp3
-
-   Exemplo:
-     audios/gato.mp3      → "Gato! Miau!"
-     audios/cachorro.mp3  → "Cachorro! Au au!"
-     audios/vaca.mp3      → "Vaca! Muuu!"
-
-   Se o MP3 não existir, cai automaticamente para a voz
-   do navegador (TTS em pt-BR).
+   audio.js — som, voz e trilha sonora
    ============================================================ */
 
 let somLigado = true;
 let ctxAudio  = null;
 
-/* ---------- MOTOR DE ÁUDIO (jingles) ---------- */
+/* ---------- MOTOR DE ÁUDIO ---------- */
 function pegarCtx(){
   if (!ctxAudio){
     const AC = window.AudioContext || window.webkitAudioContext;
@@ -42,7 +30,7 @@ function nota(freq, inicio, dur, tipo='triangle', vol=0.16){
   o.start(t0); o.stop(t0 + dur + 0.06);
 }
 
-/* ---------- EFEITOS SONOROS ---------- */
+/* ---------- EFEITOS ---------- */
 function tocarAcerto(){
   nota(523.25, 0.00, 0.18);
   nota(659.25, 0.11, 0.18);
@@ -59,19 +47,86 @@ function tocarFanfarra(){
   nota(1046.5, 0.40, 0.45);
 }
 
+/* ============================================================
+   TRILHA SONORA — arpejo suave em pentatônica de C
+   ============================================================ */
+let musicaGanho  = null;
+let musicaTimer  = null;
+let musicaAtiva  = false;
+
+const MELODIA = [
+  [523.25, 0.0], [659.25, 0.5], [783.99, 1.0], [659.25, 1.5],
+  [587.33, 2.0], [698.46, 2.5], [880.00, 3.0], [698.46, 3.5],
+  [493.88, 4.0], [587.33, 4.5], [698.46, 5.0], [587.33, 5.5],
+  [440.00, 6.0], [523.25, 6.5], [659.25, 7.0], [523.25, 7.5]
+];
+const LOOP_DUR = 8.0;   /* segundos */
+
+function tocarMusicaVolta(tInicio){
+  if (!somLigado || !musicaAtiva) return;
+  const c = pegarCtx(); if (!c) return;
+
+  MELODIA.forEach(([freq, offset]) => {
+    const t = tInicio + offset;
+    if (t < c.currentTime) return;
+    const o = c.createOscillator();
+    const g = c.createGain();
+    o.type = 'sine';
+    o.frequency.setValueAtTime(freq, t);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(1, t + 0.05);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 1.4);
+    o.connect(g);
+    if (musicaGanho) g.connect(musicaGanho);
+    o.start(t);
+    o.stop(t + 1.5);
+  });
+
+  const proximo = tInicio + LOOP_DUR;
+  const atraso  = (proximo - c.currentTime - 0.4) * 1000;
+  musicaTimer = setTimeout(() => tocarMusicaVolta(proximo), Math.max(500, atraso));
+}
+
+function iniciarMusica(){
+  if (!somLigado || musicaAtiva) return;
+  const c = pegarCtx(); if (!c) return;
+
+  musicaGanho = c.createGain();
+  musicaGanho.gain.value = 0.030;   /* bem suave, ao fundo */
+  musicaGanho.connect(c.destination);
+
+  musicaAtiva = true;
+  tocarMusicaVolta(c.currentTime + 0.2);
+}
+
+function pararMusica(){
+  musicaAtiva = false;
+  if (musicaTimer){
+    clearTimeout(musicaTimer);
+    musicaTimer = null;
+  }
+  if (musicaGanho){
+    try{
+      const c = pegarCtx();
+      if (c) musicaGanho.gain.exponentialRampToValueAtTime(0.0001, c.currentTime + 0.25);
+    }catch(e){}
+    const ref = musicaGanho;
+    musicaGanho = null;
+    setTimeout(() => { try{ ref.disconnect(); }catch(e){} }, 400);
+  }
+}
+
 /* ---------- VOZ (TTS) ---------- */
 function prepararVozes(){
   if (!('speechSynthesis' in window)) return;
   window.speechSynthesis.getVoices();
   window.speechSynthesis.onvoiceschanged = () => {};
 }
-
 function acharVozBR(){
   const vozes = window.speechSynthesis.getVoices() || [];
   return vozes.find(v => /pt[-_]?BR/i.test(v.lang))
       || vozes.find(v => /^pt/i.test(v.lang)) || null;
 }
-
 function criarFala(texto, pitch=1.05, rate=0.85){
   const u = new SpeechSynthesisUtterance(texto);
   u.lang = 'pt-BR';
@@ -80,8 +135,6 @@ function criarFala(texto, pitch=1.05, rate=0.85){
   if (v) u.voice = v;
   return u;
 }
-
-/* fala simples (só um texto) */
 function falar(texto){
   if (!somLigado || !('speechSynthesis' in window)) return;
   try{
@@ -89,8 +142,6 @@ function falar(texto){
     window.speechSynthesis.speak(criarFala(texto));
   }catch(e){}
 }
-
-/* TTS: nome + som, chama callback quando TERMINAR */
 function ttsNomeESom(nome, som, callback){
   if (!('speechSynthesis' in window)){
     if (callback) setTimeout(callback, 400);
@@ -109,7 +160,6 @@ function ttsNomeESom(nome, som, callback){
     };
 
     falaSom.onend = finalizar;
-    // segurança: se por algum motivo não disparar onend, libera em 6s
     setTimeout(finalizar, 6000);
 
     window.speechSynthesis.speak(falaNome);
@@ -119,31 +169,21 @@ function ttsNomeESom(nome, som, callback){
   }
 }
 
-/* ============================================================
-   FUNÇÃO PRINCIPAL — fala o nome + som, chama callback no fim
-   ------------------------------------------------------------
-   Estratégia:
-     1. Tenta tocar audios/{id}.mp3
-     2. Se não existir (404) → cai para TTS
-     3. Quando QUALQUER UM terminar → chama callback
-   ============================================================ */
 function falarNomeESom(idAnimal, nome, som, callback){
-  /* som desligado: só espera um pouco e segue */
   if (!somLigado){
     if (callback) setTimeout(callback, 500);
     return;
   }
 
   const audio = new Audio();
-  let terminado = false;   /* já chamamos o callback? */
-  let caindoTTS = false;   /* já estamos no fallback? */
+  let terminado = false;
+  let caindoTTS = false;
 
   const finalizar = () => {
     if (terminado) return;
     terminado = true;
     if (callback) callback();
   };
-
   const cairParaTTS = () => {
     if (terminado || caindoTTS) return;
     caindoTTS = true;
@@ -156,19 +196,21 @@ function falarNomeESom(idAnimal, nome, som, callback){
   audio.src = `audios/${idAnimal}.mp3`;
   audio.play().catch(cairParaTTS);
 
-  /* rede de segurança: nunca trava mais de 8s */
   setTimeout(finalizar, 8000);
 }
 
-/* ---------- PARAR TUDO ---------- */
+/* ---------- PARAR / ALTERNAR ---------- */
 function pararAudio(){
   if ('speechSynthesis' in window) window.speechSynthesis.cancel();
 }
-
-/* ---------- LIGA / DESLIGA ---------- */
 function alternarSom(){
   somLigado = !somLigado;
-  if (!somLigado) pararAudio();
+  if (!somLigado){
+    pararAudio();
+    pararMusica();
+  } else {
+    iniciarMusica();
+  }
   return somLigado;
 }
 

@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#1f6f9c">
 <title>Cabeça de Animais 🐾</title>
+<meta name="description" content="Jogo educativo para crianças aprenderem os animais em português.">
 
 <link rel="manifest" href="manifest.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -28,6 +29,11 @@
     <div class="menu-acoes">
       <button id="btnJogar" class="btn-grande">▶️ Jogar</button>
       <button id="btnEscolher" class="btn-grande btn-sec">🗺️ Escolher Fase</button>
+      <button id="btnTrocarPerfil" class="btn-perfil">
+        <span id="perfilAvatar">🐱</span>
+        <span id="perfilNome">Jogador 1</span>
+        <span class="trocar">trocar</span>
+      </button>
     </div>
     <div class="menu-rodape">
       <button id="btnSomMenu" class="icon-btn" aria-label="Ligar ou desligar som">🔊</button>
@@ -43,6 +49,15 @@
       <div class="spacer"></div>
     </header>
     <div id="gridFases" class="grid-fases"></div>
+  </section>
+
+  <section id="telaPerfis" class="tela hidden">
+    <header class="topbar">
+      <button id="btnPerfisVoltar" class="icon-btn" aria-label="Voltar">←</button>
+      <h2>Quem está jogando?</h2>
+      <div class="spacer"></div>
+    </header>
+    <div id="gridPerfis" class="grid-perfis"></div>
   </section>
 
   <section id="telaJogo" class="tela hidden">

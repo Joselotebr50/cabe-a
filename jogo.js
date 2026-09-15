@@ -1,7 +1,6 @@
 /* ============================================================
    jogo.js — lógica do jogo
-   Lote 1: vibração, bloquear rotação, aceno, confete temático,
-   letra em destaque
+   Lote 2: perfis múltiplos + trilha sonora
    ============================================================ */
 
 const ANIMAIS = {
@@ -56,7 +55,6 @@ const TEMAS = {
               { e:'✨', x:50, y:6, s:24 } ] }
 };
 
-/* Confete temático por cenário */
 const CONFETE_TEMA = {
   casa:    ['🏠','🌷','💛','🌻','⭐','✨'],
   fazenda: ['🌾','🌻','🚜','🍀','⭐','🐴'],
@@ -84,41 +82,111 @@ const POSICOES = {
 };
 const ALVO = { x:50, y:35 };
 
-const STORAGE_KEY = 'cabecaAnimais.progresso.v1';
-let progresso = { maxFase: 1, estrelas: {} };
+/* ============================================================
+   PERFIS
+   ============================================================ */
+const STORAGE_PERFIS = 'cabecaAnimais.perfis.v2';
+const STORAGE_ANTIGO = 'cabecaAnimais.progresso.v1';
+const AVATARES = ['🐱','🐶','🐰','🦁','🐼','🦊','🐸','🐵'];
 
-function carregarProgresso(){
+let dados = { atual:null, perfis:{} };
+
+function carregarPerfis(){
   try{
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(STORAGE_PERFIS);
     if (raw){
       const o = JSON.parse(raw);
-      if (o && typeof o === 'object'){
-        if (typeof o.maxFase === 'number') progresso.maxFase = o.maxFase;
-        if (o.estrelas && typeof o.estrelas === 'object') progresso.estrelas = o.estrelas;
+      if (o && typeof o === 'object' && o.perfis && typeof o.perfis === 'object'){
+        dados = {
+          atual: o.atual || null,
+          perfis: o.perfis
+        };
       }
     }
   }catch(e){}
-  if (progresso.maxFase < 1) progresso.maxFase = 1;
-  if (progresso.maxFase > FASES.length) progresso.maxFase = FASES.length;
-}
-function salvarProgresso(){
-  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(progresso)); }catch(e){}
+
+  /* migração do formato antigo */
+  if (Object.keys(dados.perfis).length === 0){
+    let antigo = null;
+    try{
+      const r = localStorage.getItem(STORAGE_ANTIGO);
+      if (r) antigo = JSON.parse(r);
+    }catch(e){}
+    const id = 'p' + Date.now();
+    dados.perfis[id] = {
+      nome: 'Jogador 1',
+      avatar: '🐱',
+      maxFase: (antigo && antigo.maxFase) || 1,
+      estrelas: (antigo && antigo.estrelas) || {}
+    };
+    dados.atual = id;
+    salvarPerfis();
+  }
+
+  if (!dados.perfis[dados.atual]){
+    dados.atual = Object.keys(dados.perfis)[0] || null;
+  }
 }
 
-const telaMenu = document.getElementById('telaMenu');
-const telaMapa = document.getElementById('telaMapa');
-const telaJogo = document.getElementById('telaJogo');
-const gridFases= document.getElementById('gridFases');
+function salvarPerfis(){
+  try{ localStorage.setItem(STORAGE_PERFIS, JSON.stringify(dados)); }catch(e){}
+}
+
+function perfilAtual(){
+  return dados.perfis[dados.atual] || null;
+}
+
+function criarPerfil(nome, avatar){
+  if (Object.keys(dados.perfis).length >= 4) return null;
+  const id = 'p' + Date.now();
+  dados.perfis[id] = {
+    nome: nome.trim() || 'Jogador',
+    avatar: avatar || '🐱',
+    maxFase: 1,
+    estrelas: {}
+  };
+  dados.atual = id;
+  salvarPerfis();
+  return id;
+}
+
+function apagarPerfil(id){
+  if (Object.keys(dados.perfis).length <= 1) return false;
+  delete dados.perfis[id];
+  if (dados.atual === id){
+    dados.atual = Object.keys(dados.perfis)[0];
+  }
+  salvarPerfis();
+  return true;
+}
+
+function trocarPerfil(id){
+  if (!dados.perfis[id]) return;
+  dados.atual = id;
+  salvarPerfis();
+}
+
+/* ============================================================
+   REFERÊNCIAS DOM
+   ============================================================ */
+const telaMenu   = document.getElementById('telaMenu');
+const telaMapa   = document.getElementById('telaMapa');
+const telaPerfis = document.getElementById('telaPerfis');
+const telaJogo   = document.getElementById('telaJogo');
+const gridFases  = document.getElementById('gridFases');
+const gridPerfis = document.getElementById('gridPerfis');
 const jogoTitulo = document.getElementById('jogoTitulo');
-const stage     = document.getElementById('stage');
-const decor     = document.getElementById('decor');
-const headsEl   = document.getElementById('heads');
-const bodyWrap  = document.getElementById('bodyWrap');
-const toastEl   = document.getElementById('toast');
-const nomeLabel = document.getElementById('nomeLabel');
-const pipsEl    = document.getElementById('pips');
-const overlay   = document.getElementById('overlay');
+const stage      = document.getElementById('stage');
+const decor      = document.getElementById('decor');
+const headsEl    = document.getElementById('heads');
+const bodyWrap   = document.getElementById('bodyWrap');
+const toastEl    = document.getElementById('toast');
+const nomeLabel  = document.getElementById('nomeLabel');
+const pipsEl     = document.getElementById('pips');
+const overlay    = document.getElementById('overlay');
 const btnSomMenu = document.getElementById('btnSomMenu');
+const perfilAvatar = document.getElementById('perfilAvatar');
+const perfilNome = document.getElementById('perfilNome');
 
 let faseAtual = null;
 let acertos = 0, erros = 0;
@@ -129,6 +197,7 @@ function shuffle(a){ for (let i=a.length-1;i>0;i--){ const j=rand(i+1);[a[i],a[j
 function mostrarTela(q){
   telaMenu.classList.toggle('hidden', q !== 'menu');
   telaMapa.classList.toggle('hidden', q !== 'mapa');
+  telaPerfis.classList.toggle('hidden', q !== 'perfis');
   telaJogo.classList.toggle('hidden', q !== 'jogo');
 }
 
@@ -299,12 +368,23 @@ window.addEventListener('orientationchange', () => setTimeout(ajustarUnidade, 12
 
 function atualizarIconeSom(){ btnSomMenu.textContent = somLigado ? '🔊' : '🔇'; }
 
+/* ---------- PERFIL NA TELA DO MENU ---------- */
+function atualizarPerfilMenu(){
+  const p = perfilAtual();
+  if (!p) return;
+  perfilAvatar.textContent = p.avatar;
+  perfilNome.textContent = p.nome;
+}
+
+/* ---------- MAPA DE FASES ---------- */
 function montarMapa(){
+  const p = perfilAtual();
+  if (!p) return;
   gridFases.innerHTML = '';
   FASES.forEach((f, i) => {
     const num = i + 1;
-    const liberada = num <= progresso.maxFase;
-    const estrelas = progresso.estrelas[num] || 0;
+    const liberada = num <= p.maxFase;
+    const estrelas = p.estrelas[num] || 0;
     const btn = document.createElement('button');
     btn.className = 'fase-card' + (liberada ? '' : ' bloqueada');
     btn.type = 'button';
@@ -321,6 +401,122 @@ function montarMapa(){
   });
 }
 
+/* ============================================================
+   TELA DE PERFIS
+   ============================================================ */
+function montarPerfis(){
+  gridPerfis.innerHTML = '';
+  Object.keys(dados.perfis).forEach(id => {
+    const p = dados.perfis[id];
+    const card = document.createElement('div');
+    card.className = 'perfil-card' + (id === dados.atual ? ' atual' : '');
+    card.innerHTML = `
+      <button class="btn-apagar" data-id="${id}" aria-label="Apagar perfil">×</button>
+      <div class="avatar">${p.avatar}</div>
+      <div class="nome">${p.nome}</div>
+      <div class="fases-info">Fase ${p.maxFase} · ${Object.values(p.estrelas).reduce((a,b)=>a+b,0)}⭐</div>
+    `;
+    card.addEventListener('click', (e) => {
+      if (e.target.classList.contains('btn-apagar')) return;
+      trocarPerfil(id);
+      salvarPerfis();
+      atualizarPerfilMenu();
+      montarPerfis();
+      mostrarToast(`Olá, ${p.nome}!`);
+      setTimeout(() => {
+        mostrarTela('menu');
+        atualizarPerfilMenu();
+      }, 500);
+    });
+    card.querySelector('.btn-apagar').addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (Object.keys(dados.perfis).length <= 1){
+        mostrarToast('Precisa ter pelo menos 1 perfil!');
+        return;
+      }
+      if (confirm(`Apagar o perfil "${p.nome}"?`)){
+        apagarPerfil(id);
+        atualizarPerfilMenu();
+        montarPerfis();
+      }
+    });
+    gridPerfis.appendChild(card);
+  });
+
+  /* card de adicionar */
+  if (Object.keys(dados.perfis).length < 4){
+    const add = document.createElement('div');
+    add.className = 'perfil-card add';
+    add.innerHTML = `<div class="avatar">＋</div><div class="nome">Novo jogador</div>`;
+    add.addEventListener('click', abrirModalNovoPerfil);
+    gridPerfis.appendChild(add);
+  }
+}
+
+/* ---------- MODAL DE NOVO PERFIL ---------- */
+let modalPerfil = null;
+let avatarEscolhido = '🐱';
+
+function criarModal(){
+  const div = document.createElement('div');
+  div.id = 'modalPerfil';
+  div.className = 'hidden';
+  div.innerHTML = `
+    <div class="modal-card">
+      <h3>Novo jogador</h3>
+      <p>Escolha um bichinho e dê um nome</p>
+      <div class="avatar-grid" id="avatarGrid"></div>
+      <input type="text" class="campo-nome" id="campoNome" maxlength="12" placeholder="Nome" value="Jogador ${Object.keys(dados.perfis).length + 1}">
+      <div class="modal-acoes">
+        <button class="sec" id="btnCancelarPerfil">Cancelar</button>
+        <button id="btnSalvarPerfil">Criar</button>
+      </div>
+    </div>`;
+  document.querySelector('.app').appendChild(div);
+  modalPerfil = div;
+
+  const grid = div.querySelector('#avatarGrid');
+  AVATARES.forEach(a => {
+    const b = document.createElement('button');
+    b.className = 'avatar-op' + (a === avatarEscolhido ? ' ativo' : '');
+    b.textContent = a;
+    b.addEventListener('click', () => {
+      avatarEscolhido = a;
+      grid.querySelectorAll('.avatar-op').forEach(x => x.classList.toggle('ativo', x.textContent === a));
+    });
+    grid.appendChild(b);
+  });
+
+  div.querySelector('#btnCancelarPerfil').addEventListener('click', fecharModalPerfil);
+  div.querySelector('#btnSalvarPerfil').addEventListener('click', salvarNovoPerfil);
+  div.addEventListener('click', (e) => { if (e.target === div) fecharModalPerfil(); });
+}
+
+function abrirModalNovoPerfil(){
+  if (!modalPerfil) criarModal();
+  avatarEscolhido = AVATARES[rand(AVATARES.length)];
+  modalPerfil.querySelector('#campoNome').value = 'Jogador ' + (Object.keys(dados.perfis).length + 1);
+  modalPerfil.querySelectorAll('.avatar-op').forEach(x => {
+    x.classList.toggle('ativo', x.textContent === avatarEscolhido);
+  });
+  modalPerfil.classList.remove('hidden');
+  setTimeout(() => modalPerfil.querySelector('#campoNome').focus(), 100);
+}
+
+function fecharModalPerfil(){
+  if (modalPerfil) modalPerfil.classList.add('hidden');
+}
+
+function salvarNovoPerfil(){
+  const nome = modalPerfil.querySelector('#campoNome').value.trim() || 'Jogador';
+  criarPerfil(nome, avatarEscolhido);
+  fecharModalPerfil();
+  atualizarPerfilMenu();
+  montarPerfis();
+  mostrarToast(`Olá, ${nome}!`);
+}
+
+/* ---------- ABRIR FASE ---------- */
 function abrirFase(numero){
   const i = Math.max(0, Math.min(FASES.length-1, numero-1));
   faseAtual = { index: i, config: FASES[i] };
@@ -333,6 +529,7 @@ function abrirFase(numero){
   acertos = 0; erros = 0; ultimoId = null; atual = null; travado = false;
 
   pararAudio();
+  if (somLigado) iniciarMusica();
   overlay.classList.add('hidden');
   overlay.innerHTML = '';
 
@@ -503,7 +700,6 @@ function acertou(el){
     if (inner) inner.classList.add('encaixada');
   }, 380);
 
-  /* bichinho acena ao receber a cabeça */
   setTimeout(() => {
     bodyWrap.classList.remove('acenando');
     void bodyWrap.offsetWidth;
@@ -511,15 +707,12 @@ function acertou(el){
     setTimeout(() => bodyWrap.classList.remove('acenando'), 800);
   }, 400);
 
-  /* vibração de acerto (curta) */
   vibrar(35);
-
   [...headsEl.children].forEach(h => { if (h !== el) h.classList.add('esconder'); });
 
   explodir(sr.width * (ALVO.x/100), sr.height * (ALVO.y/100));
   tocarAcerto();
 
-  /* etiqueta com letra em destaque: "G de GATO" */
   setTimeout(() => {
     const letra = atual.nome.charAt(0).toUpperCase();
     nomeLabel.innerHTML = `${atual.emoji} <span class="letra-destaque">${letra}</span> de ${atual.nome.toUpperCase()}`;
@@ -544,7 +737,7 @@ function acertou(el){
 function errou(el){
   erros++;
   tocarErro();
-  vibrar([70, 50, 70]);   /* vibração dupla de erro */
+  vibrar([70, 50, 70]);
   mostrarToast('Ops! Tente de novo! 🙈');
   voltarAoLugar(el);
   const inner = el.querySelector('.head-inner');
@@ -579,7 +772,6 @@ function explodir(x, y){
   }
 }
 
-/* Confete temático por cenário */
 function soltarConfete(){
   const visual = faseAtual ? faseAtual.config.visual : 'casa';
   const ic = CONFETE_TEMA[visual] || CONFETE_TEMA.casa;
@@ -601,12 +793,13 @@ function calcularEstrelas(e){ return e === 0 ? 3 : e <= 2 ? 2 : 1; }
 
 function terminarFase(){
   const num = faseAtual.index + 1;
+  const p = perfilAtual();
   const estrelas = calcularEstrelas(erros);
 
-  const anterior = progresso.estrelas[num] || 0;
-  if (estrelas > anterior) progresso.estrelas[num] = estrelas;
-  if (num === progresso.maxFase && num < FASES.length) progresso.maxFase = num + 1;
-  salvarProgresso();
+  const anterior = p.estrelas[num] || 0;
+  if (estrelas > anterior) p.estrelas[num] = estrelas;
+  if (num === p.maxFase && num < FASES.length) p.maxFase = num + 1;
+  salvarPerfis();
 
   let eHTML = '';
   for (let k=0;k<3;k++) eHTML += k < estrelas ? '⭐' : '<span class="vazia">⭐</span>';
@@ -614,7 +807,9 @@ function terminarFase(){
   const ultima = num === FASES.length;
   const btnProxima = !ultima ? `<button id="btnProxima">➡️ Próxima fase</button>` : '';
   const titulo = ultima ? '🎖️ Mestre dos Bichinhos!' : 'Parabéns!';
-  const msg = ultima ? 'Você completou todas as fases!' : 'Você terminou a Fase ' + num + '!';
+  const msg = ultima
+    ? `${p.avatar} ${p.nome} completou todas as fases!`
+    : `${p.avatar} ${p.nome} terminou a Fase ${num}!`;
 
   overlay.innerHTML = `
     <div class="win-card">
@@ -630,10 +825,13 @@ function terminarFase(){
     </div>`;
   overlay.classList.remove('hidden');
 
+  pararMusica();
   tocarFanfarra();
   vibrar([60, 40, 60, 40, 120]);
   setTimeout(() => {
-    falar(ultima ? 'Parabéns! Você virou Mestre dos Bichinhos!' : 'Parabéns! Você completou a fase!');
+    falar(ultima
+      ? `Parabéns ${p.nome}! Você virou Mestre dos Bichinhos!`
+      : `Parabéns ${p.nome}! Você completou a fase!`);
   }, 700);
   soltarConfete();
 
@@ -645,28 +843,41 @@ function terminarFase(){
 
 function voltarAoMenu(){
   pararAudio();
+  pararMusica();
   overlay.classList.add('hidden');
   overlay.innerHTML = '';
   document.body.style.background = 'linear-gradient(180deg,#a9e4ff 0%,#cdefff 42%,#d7f5c4 100%)';
   limparTema();
+  atualizarPerfilMenu();
   mostrarTela('menu');
 }
 function abrirMapa(){
   pararAudio();
+  pararMusica();
   document.body.style.background = 'linear-gradient(180deg,#a9e4ff 0%,#cdefff 42%,#d7f5c4 100%)';
   montarMapa();
   mostrarTela('mapa');
+}
+function abrirTelaPerfis(){
+  pararAudio();
+  pararMusica();
+  montarPerfis();
+  mostrarTela('perfis');
 }
 function comecarJogo(){
   pegarCtx();
   if (!estaTelaCheia()) entrarTelaCheia();
   tentarBloquearRotacao();
-  abrirFase(Math.min(progresso.maxFase, FASES.length));
+  const p = perfilAtual();
+  abrirFase(Math.min(p.maxFase, FASES.length));
 }
 
+/* ---------- BOTÕES ---------- */
 document.getElementById('btnJogar').addEventListener('click', comecarJogo);
 document.getElementById('btnEscolher').addEventListener('click', abrirMapa);
+document.getElementById('btnTrocarPerfil').addEventListener('click', abrirTelaPerfis);
 document.getElementById('btnMapaVoltar').addEventListener('click', voltarAoMenu);
+document.getElementById('btnPerfisVoltar').addEventListener('click', voltarAoMenu);
 document.getElementById('btnJogoVoltar').addEventListener('click', voltarAoMenu);
 document.getElementById('btnReiniciarFase').addEventListener('click', () => {
   if (faseAtual) abrirFase(faseAtual.index + 1);
@@ -676,9 +887,11 @@ btnSomMenu.addEventListener('click', () => {
   atualizarIconeSom();
 });
 document.getElementById('btnZerar').addEventListener('click', () => {
-  if (confirm('Apagar todo o progresso e começar do zero?')){
-    progresso = { maxFase: 1, estrelas: {} };
-    salvarProgresso();
+  const p = perfilAtual();
+  if (confirm(`Apagar o progresso de "${p.nome}"?`)){
+    p.maxFase = 1;
+    p.estrelas = {};
+    salvarPerfis();
     montarMapa();
     mostrarToast('Progresso apagado!');
   }
@@ -722,7 +935,6 @@ function atualizarIconeTelaCheia(){
   const btn = document.getElementById('btnTelaCheia');
   if (btn) btn.textContent = estaTelaCheia() ? '🗗' : '⛶';
 }
-
 const suportaTelaCheia = !!(
   document.documentElement.requestFullscreen ||
   document.documentElement.webkitRequestFullscreen
@@ -737,7 +949,8 @@ const btnTC = document.getElementById('btnTelaCheia');
 if (btnTC) btnTC.addEventListener('click', alternarTelaCheia);
 
 /* ---------- INÍCIO ---------- */
-carregarProgresso();
+carregarPerfis();
+atualizarPerfilMenu();
 atualizarIconeSom();
 mostrarTela('menu');
 window.addEventListener('load', () => setTimeout(ajustarUnidade, 60));
