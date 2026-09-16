@@ -14,7 +14,6 @@
 <meta name="apple-mobile-web-app-title" content="Cabeça">
 <link rel="apple-touch-icon" href="icones/icone-192.png">
 <link rel="icon" type="image/png" href="icones/icone-192.png">
-
 <link rel="stylesheet" href="estilo.css">
 </head>
 <body>
@@ -29,6 +28,7 @@
     <div class="menu-acoes">
       <button id="btnJogar" class="btn-grande">▶️ Jogar</button>
       <button id="btnEscolher" class="btn-grande btn-sec">🗺️ Escolher Fase</button>
+      <button id="btnCria" class="btn-grande btn-sec">🎨 Cria seu bicho</button>
       <button id="btnTrocarPerfil" class="btn-perfil">
         <span id="perfilAvatar">🐱</span>
         <span id="perfilNome">Jogador 1</span>
@@ -58,6 +58,24 @@
       <div class="spacer"></div>
     </header>
     <div id="gridPerfis" class="grid-perfis"></div>
+  </section>
+
+  <section id="telaCria" class="tela hidden">
+    <header class="topbar">
+      <button id="btnCriaVoltar" class="icon-btn" aria-label="Voltar">←</button>
+      <h2>Cria seu bicho</h2>
+      <button id="btnCriaOuvir" class="icon-btn" aria-label="Ouvir">🔊</button>
+    </header>
+    <div id="criaStage">
+      <div id="criaBody"></div>
+      <div id="criaHead"></div>
+    </div>
+    <div class="cria-controles">
+      <button id="btnTrocaCorpo" class="btn-cria">🔄 Corpo</button>
+      <button id="btnSortear" class="btn-cria grande">🎲 Sortear</button>
+      <button id="btnTrocaCabeca" class="btn-cria">🔄 Cabeça</button>
+    </div>
+    <div class="cria-nome" id="criaNome">—</div>
   </section>
 
   <section id="telaJogo" class="tela hidden">

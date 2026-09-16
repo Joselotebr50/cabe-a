@@ -1,33 +1,48 @@
 /* ============================================================
-   jogo.js — lógica do jogo
-   Lote 2: perfis múltiplos + trilha sonora
+   jogo.js — Lote 3: novos animais + cria seu bicho
    ============================================================ */
 
 const ANIMAIS = {
+  /* Casa */
   gato:       { emoji:'🐱', nome:'Gato',       cor:'#F2A25C', escuro:'#D9833A', claro:'#FFD9B0', som:'Miau! Miau!',    tipo:'quadrupede', rabo:'longo' },
   cachorro:   { emoji:'🐶', nome:'Cachorro',   cor:'#C99A66', escuro:'#A87A48', claro:'#EBC9A3', som:'Au au! Au au!',  tipo:'quadrupede', rabo:'longo' },
   coelho:     { emoji:'🐰', nome:'Coelho',     cor:'#F0E8DF', escuro:'#B4A594', claro:'#FFFFFF', som:'Nhac nhac!',     tipo:'quadrupede', rabo:'curto' },
   passarinho: { emoji:'🐦', nome:'Passarinho', cor:'#7EC0E8', escuro:'#4A8FBC', claro:'#C8E8F8', som:'Piu piu!',       tipo:'ave' },
   peixinho:   { emoji:'🐠', nome:'Peixinho',   cor:'#FF8C6B', escuro:'#D5623F', claro:'#FFD1BE', som:'Glub glub!',     tipo:'peixe' },
   hamster:    { emoji:'🐹', nome:'Hamster',    cor:'#E2B878', escuro:'#B98E4D', claro:'#F8E4B8', som:'Iiii iiii!',     tipo:'quadrupede', rabo:'curto' },
+  /* Fazenda */
   vaca:       { emoji:'🐮', nome:'Vaca',       cor:'#F3EEE4', escuro:'#4A4A4A', claro:'#FFFFFF', som:'Muuu! Muuu!',    tipo:'quadrupede', rabo:'longo' },
   porco:      { emoji:'🐷', nome:'Porco',      cor:'#F5A8C0', escuro:'#DE7F9E', claro:'#FFD3E0', som:'Oinc! Oinc!',    tipo:'quadrupede', rabo:'encaracolado' },
   ovelha:     { emoji:'🐑', nome:'Ovelha',     cor:'#F0EBE1', escuro:'#C4B9A5', claro:'#FFFFFF', som:'Bééé! Bééé!',    tipo:'quadrupede', rabo:'curto' },
   galinha:    { emoji:'🐔', nome:'Galinha',    cor:'#FFE9A8', escuro:'#D9B84A', claro:'#FFF5CC', som:'Có có! Có có!',  tipo:'ave' },
   cavalo:     { emoji:'🐴', nome:'Cavalo',     cor:'#B07A50', escuro:'#8A5A34', claro:'#D8B080', som:'Iii hiii!',      tipo:'quadrupede', rabo:'longo' },
   pato:       { emoji:'🦆', nome:'Pato',       cor:'#F5E64C', escuro:'#C8B420', claro:'#FFF5A0', som:'Quá quá!',       tipo:'ave' },
+  /* Selva */
   leao:       { emoji:'🦁', nome:'Leão',       cor:'#E8B84B', escuro:'#C28F2A', claro:'#FFE6A8', som:'Roar!',          tipo:'quadrupede', rabo:'longo' },
   elefante:   { emoji:'🐘', nome:'Elefante',   cor:'#A0A4B0', escuro:'#70757F', claro:'#C8CCD6', som:'Fuummm!',        tipo:'quadrupede', rabo:'curto' },
   macaco:     { emoji:'🐵', nome:'Macaco',     cor:'#B08058', escuro:'#8A5F3C', claro:'#D8B088', som:'Uhu uhu ah ah!', tipo:'quadrupede', rabo:'longo' },
   tigre:      { emoji:'🐯', nome:'Tigre',      cor:'#F0A020', escuro:'#C77800', claro:'#FFD280', som:'Grrr!',          tipo:'quadrupede', rabo:'longo' },
   panda:      { emoji:'🐼', nome:'Panda',      cor:'#F8F8F8', escuro:'#444444', claro:'#FFFFFF', som:'Nhac nhac!',     tipo:'quadrupede', rabo:'curto' },
+  /* Água */
   sapo:       { emoji:'🐸', nome:'Sapo',       cor:'#7BC85C', escuro:'#5AA23C', claro:'#B6E89B', som:'Croac! Croac!',  tipo:'sapo' },
   golfinho:   { emoji:'🐬', nome:'Golfinho',   cor:'#88C8E8', escuro:'#5090B0', claro:'#C0E4F5', som:'Iii! Iii!',      tipo:'peixe' },
   baleia:     { emoji:'🐳', nome:'Baleia',     cor:'#6EB0D8', escuro:'#3D80A8', claro:'#A8D8F0', som:'Uuuuuu!',        tipo:'peixe' },
   pinguim:    { emoji:'🐧', nome:'Pinguim',    cor:'#3A3A3A', escuro:'#111111', claro:'#FFFFFF', som:'Nhonhonho!',     tipo:'ave' },
-  tartaruga:  { emoji:'🐢', nome:'Tartaruga',  cor:'#7CB860', escuro:'#4A8A3A', claro:'#B0DC98', som:'Uuuu!',          tipo:'tartaruga' }
+  tartaruga:  { emoji:'🐢', nome:'Tartaruga',  cor:'#7CB860', escuro:'#4A8A3A', claro:'#B0DC98', som:'Uuuu!',          tipo:'tartaruga' },
+  /* Brasil (novos) */
+  onca:       { emoji:'🐆', nome:'Onça',       cor:'#E8C060', escuro:'#A07830', claro:'#FFF0C8', som:'Grrr! Grrr!',    tipo:'quadrupede', rabo:'longo', pintas:true },
+  arara:      { emoji:'🦜', nome:'Arara',      cor:'#E05050', escuro:'#A02828', claro:'#FFD0B0', som:'Crá! Crá!',      tipo:'ave',       bico:'forte' },
+  preguiça:   { emoji:'🦥', nome:'Preguiça',   cor:'#A08060', escuro:'#705840', claro:'#D8C0A8', som:'Uuuuu!',         tipo:'quadrupede', rabo:'curto' },
+  jacare:     { emoji:'🐊', nome:'Jacaré',     cor:'#508050', escuro:'#305030', claro:'#90B090', som:'Grrr!',          tipo:'sapo',      escamas:true },
+  /* Fantásticos (novos) */
+  trex:       { emoji:'🦖', nome:'T-Rex',      cor:'#6A9A50', escuro:'#3A6030', claro:'#A8D090', som:'ROAR!',          tipo:'quadrupede', rabo:'longo' },
+  bronto:     { emoji:'🦕', nome:'Brontossauro',cor:'#8090A0',escuro:'#506070', claro:'#C0D0E0', som:'Uuuuu!',         tipo:'quadrupede', rabo:'longo' },
+  dragao:     { emoji:'🐉', nome:'Dragão',     cor:'#C04040', escuro:'#802020', claro:'#FFB0B0', som:'Fuuuu!',         tipo:'dragao',    rabo:'longo' },
+  unicornio:  { emoji:'🦄', nome:'Unicórnio',  cor:'#E8B0D0', escuro:'#A878A0', claro:'#FFE0F0', som:'Ihhh!',          tipo:'quadrupede', rabo:'longo' }
 };
 const TODOS = Object.keys(ANIMAIS);
+const BICHOS_BR = ['onca','arara','preguiça','jacare'];
+const BICHOS_FANTASTICOS = ['trex','bronto','dragao','unicornio'];
 
 const TEMAS = {
   casa:    { fundo:'linear-gradient(180deg,#c8e8ff 0%,#e0f0ff 42%,#d8f0b8 100%)', decor:[
@@ -52,27 +67,39 @@ const TEMAS = {
   trofeu:  { fundo:'linear-gradient(180deg,#ffe9a8 0%,#ffd060 50%,#e8a020 100%)', decor:[
               { e:'🏆', x:10, y:14, s:48 }, { e:'👑', x:90, y:12, s:42 },
               { e:'⭐', x:8, y:90, s:28 }, { e:'🥇', x:92, y:90, s:32 },
-              { e:'✨', x:50, y:6, s:24 } ] }
+              { e:'✨', x:50, y:6, s:24 } ] },
+  brasil:  { fundo:'linear-gradient(180deg,#4aa848 0%,#88c070 45%,#e8d060 100%)', decor:[
+              { e:'🌴', x:8, y:14, s:54 }, { e:'🌴', x:92, y:16, s:50 },
+              { e:'🦜', x:50, y:6, s:30 }, { e:'🌺', x:7, y:88, s:34 },
+              { e:'🌿', x:93, y:88, s:34 } ] },
+  fantasia:{ fundo:'linear-gradient(180deg,#5a3080 0%,#9050c0 45%,#e0a0e8 100%)', decor:[
+              { e:'🌟', x:12, y:14, s:44 }, { e:'✨', x:88, y:16, s:40 },
+              { e:'🌙', x:8, y:88, s:40 }, { e:'💫', x:92, y:90, s:36 },
+              { e:'⭐', x:50, y:6, s:30 } ] }
 };
 
 const CONFETE_TEMA = {
-  casa:    ['🏠','🌷','💛','🌻','⭐','✨'],
-  fazenda: ['🌾','🌻','🚜','🍀','⭐','🐴'],
-  selva:   ['🍃','🌿','🍂','🦋','⭐','🐒'],
-  agua:    ['🫧','💧','🐚','🐠','⭐','🌊'],
-  rainbow: ['🌈','✨','🎈','💖','⭐','🎉'],
-  trofeu:  ['🏆','👑','🥇','✨','⭐','🎖️']
+  casa:     ['🏠','🌷','💛','🌻','⭐','✨'],
+  fazenda:  ['🌾','🌻','🚜','🍀','⭐','🐴'],
+  selva:    ['🍃','🌿','🍂','🦋','⭐','🐒'],
+  agua:     ['🫧','💧','🐚','🐠','⭐','🌊'],
+  rainbow:  ['🌈','✨','🎈','💖','⭐','🎉'],
+  trofeu:   ['🏆','👑','🥇','✨','⭐','🎖️'],
+  brasil:   ['🦜','🌺','🌿','🥥','⭐','💚'],
+  fantasia: ['⭐','✨','💫','🌟','🔮','🪄']
 };
 
 const FASES = [
-  { tema:'Casa I',        visual:'casa',    emoji:'🏡', animais:['gato','cachorro','coelho','passarinho'],                        opcoes:3, acertos:4 },
-  { tema:'Casa II',       visual:'casa',    emoji:'🏠', animais:['gato','cachorro','coelho','passarinho','peixinho','hamster'],  opcoes:3, acertos:4 },
-  { tema:'Fazenda I',     visual:'fazenda', emoji:'🚜', animais:['vaca','porco','ovelha','galinha'],                             opcoes:3, acertos:5 },
-  { tema:'Fazenda II',    visual:'fazenda', emoji:'🌾', animais:['vaca','porco','ovelha','galinha','cavalo','pato'],              opcoes:4, acertos:5 },
-  { tema:'Selva',         visual:'selva',   emoji:'🌴', animais:['leao','elefante','macaco','tigre','panda'],                    opcoes:4, acertos:5 },
-  { tema:'Água',          visual:'agua',    emoji:'🌊', animais:['sapo','golfinho','baleia','pinguim','tartaruga'],               opcoes:4, acertos:5 },
-  { tema:'Tudo Junto!',   visual:'rainbow', emoji:'🌈', animais: TODOS,                                                         opcoes:4, acertos:6 },
-  { tema:'Desafio Final', visual:'trofeu',  emoji:'🏆', animais: TODOS,                                                         opcoes:5, acertos:6 }
+  { tema:'Casa I',         visual:'casa',     emoji:'🏡', animais:['gato','cachorro','coelho','passarinho'],                        opcoes:3, acertos:4 },
+  { tema:'Casa II',        visual:'casa',     emoji:'🏠', animais:['gato','cachorro','coelho','passarinho','peixinho','hamster'],  opcoes:3, acertos:4 },
+  { tema:'Fazenda I',      visual:'fazenda',  emoji:'🚜', animais:['vaca','porco','ovelha','galinha'],                             opcoes:3, acertos:5 },
+  { tema:'Fazenda II',     visual:'fazenda',  emoji:'🌾', animais:['vaca','porco','ovelha','galinha','cavalo','pato'],              opcoes:4, acertos:5 },
+  { tema:'Selva',          visual:'selva',    emoji:'🌴', animais:['leao','elefante','macaco','tigre','panda'],                    opcoes:4, acertos:5 },
+  { tema:'Água',           visual:'agua',     emoji:'🌊', animais:['sapo','golfinho','baleia','pinguim','tartaruga'],               opcoes:4, acertos:5 },
+  { tema:'Tudo Junto!',    visual:'rainbow',  emoji:'🌈', animais: TODOS.slice(0,22),                                              opcoes:4, acertos:6 },
+  { tema:'Desafio Final',  visual:'trofeu',   emoji:'🏆', animais: TODOS.slice(0,22),                                              opcoes:5, acertos:6 },
+  { tema:'Brasil',         visual:'brasil',   emoji:'🇧🇷', animais: BICHOS_BR,                                                       opcoes:3, acertos:4 },
+  { tema:'Fantástico',     visual:'fantasia', emoji:'🦄', animais: BICHOS_FANTASTICOS,                                               opcoes:4, acertos:5 }
 ];
 
 const POSICOES = {
@@ -82,9 +109,6 @@ const POSICOES = {
 };
 const ALVO = { x:50, y:35 };
 
-/* ============================================================
-   PERFIS
-   ============================================================ */
 const STORAGE_PERFIS = 'cabecaAnimais.perfis.v2';
 const STORAGE_ANTIGO = 'cabecaAnimais.progresso.v1';
 const AVATARES = ['🐱','🐶','🐰','🦁','🐼','🦊','🐸','🐵'];
@@ -97,15 +121,10 @@ function carregarPerfis(){
     if (raw){
       const o = JSON.parse(raw);
       if (o && typeof o === 'object' && o.perfis && typeof o.perfis === 'object'){
-        dados = {
-          atual: o.atual || null,
-          perfis: o.perfis
-        };
+        dados = { atual: o.atual || null, perfis: o.perfis };
       }
     }
   }catch(e){}
-
-  /* migração do formato antigo */
   if (Object.keys(dados.perfis).length === 0){
     let antigo = null;
     try{
@@ -114,64 +133,38 @@ function carregarPerfis(){
     }catch(e){}
     const id = 'p' + Date.now();
     dados.perfis[id] = {
-      nome: 'Jogador 1',
-      avatar: '🐱',
+      nome: 'Jogador 1', avatar: '🐱',
       maxFase: (antigo && antigo.maxFase) || 1,
       estrelas: (antigo && antigo.estrelas) || {}
     };
     dados.atual = id;
     salvarPerfis();
   }
-
-  if (!dados.perfis[dados.atual]){
-    dados.atual = Object.keys(dados.perfis)[0] || null;
-  }
+  if (!dados.perfis[dados.atual]) dados.atual = Object.keys(dados.perfis)[0] || null;
 }
-
-function salvarPerfis(){
-  try{ localStorage.setItem(STORAGE_PERFIS, JSON.stringify(dados)); }catch(e){}
-}
-
-function perfilAtual(){
-  return dados.perfis[dados.atual] || null;
-}
-
+function salvarPerfis(){ try{ localStorage.setItem(STORAGE_PERFIS, JSON.stringify(dados)); }catch(e){} }
+function perfilAtual(){ return dados.perfis[dados.atual] || null; }
 function criarPerfil(nome, avatar){
   if (Object.keys(dados.perfis).length >= 4) return null;
   const id = 'p' + Date.now();
-  dados.perfis[id] = {
-    nome: nome.trim() || 'Jogador',
-    avatar: avatar || '🐱',
-    maxFase: 1,
-    estrelas: {}
-  };
+  dados.perfis[id] = { nome: nome.trim() || 'Jogador', avatar: avatar || '🐱', maxFase: 1, estrelas: {} };
   dados.atual = id;
   salvarPerfis();
   return id;
 }
-
 function apagarPerfil(id){
   if (Object.keys(dados.perfis).length <= 1) return false;
   delete dados.perfis[id];
-  if (dados.atual === id){
-    dados.atual = Object.keys(dados.perfis)[0];
-  }
+  if (dados.atual === id) dados.atual = Object.keys(dados.perfis)[0];
   salvarPerfis();
   return true;
 }
+function trocarPerfil(id){ if (dados.perfis[id]){ dados.atual = id; salvarPerfis(); } }
 
-function trocarPerfil(id){
-  if (!dados.perfis[id]) return;
-  dados.atual = id;
-  salvarPerfis();
-}
-
-/* ============================================================
-   REFERÊNCIAS DOM
-   ============================================================ */
 const telaMenu   = document.getElementById('telaMenu');
 const telaMapa   = document.getElementById('telaMapa');
 const telaPerfis = document.getElementById('telaPerfis');
+const telaCria   = document.getElementById('telaCria');
 const telaJogo   = document.getElementById('telaJogo');
 const gridFases  = document.getElementById('gridFases');
 const gridPerfis = document.getElementById('gridPerfis');
@@ -187,6 +180,9 @@ const overlay    = document.getElementById('overlay');
 const btnSomMenu = document.getElementById('btnSomMenu');
 const perfilAvatar = document.getElementById('perfilAvatar');
 const perfilNome = document.getElementById('perfilNome');
+const criaBody   = document.getElementById('criaBody');
+const criaHead   = document.getElementById('criaHead');
+const criaNome   = document.getElementById('criaNome');
 
 let faseAtual = null;
 let acertos = 0, erros = 0;
@@ -198,25 +194,16 @@ function mostrarTela(q){
   telaMenu.classList.toggle('hidden', q !== 'menu');
   telaMapa.classList.toggle('hidden', q !== 'mapa');
   telaPerfis.classList.toggle('hidden', q !== 'perfis');
+  telaCria.classList.toggle('hidden', q !== 'cria');
   telaJogo.classList.toggle('hidden', q !== 'jogo');
 }
 
-/* ---------- VIBRAÇÃO ---------- */
-function vibrar(padrao){
-  if (!('vibrate' in navigator)) return;
-  try{ navigator.vibrate(padrao); }catch(e){}
-}
-
-/* ---------- BLOQUEAR ROTAÇÃO ---------- */
+function vibrar(padrao){ if ('vibrate' in navigator){ try{ navigator.vibrate(padrao); }catch(e){} } }
 function tentarBloquearRotacao(){
   try{
-    if (screen.orientation && screen.orientation.lock){
-      screen.orientation.lock('portrait').catch(()=>{});
-    }
+    if (screen.orientation && screen.orientation.lock) screen.orientation.lock('portrait').catch(()=>{});
   }catch(e){}
 }
-
-/* ---------- PRÉ-CARREGAR ---------- */
 function preloadFase(){
   if (!faseAtual) return;
   faseAtual.config.animais.forEach(id => {
@@ -235,15 +222,17 @@ function preloadProximaFase(){
   }, 3000);
 }
 
-/* ---------- SVG FALLBACK ---------- */
+/* ---------- SVG POR TIPO ---------- */
 function bodySVG(a){
   const t = a.tipo || 'quadrupede';
   if (t === 'ave')       return bodyAve(a);
   if (t === 'peixe')     return bodyPeixe(a);
   if (t === 'sapo')      return bodySapo(a);
   if (t === 'tartaruga') return bodyTartaruga(a);
+  if (t === 'dragao')    return bodyDragao(a);
   return bodyQuadrupede(a);
 }
+
 function bodyQuadrupede(a){
   const rabo = a.rabo || 'longo';
   let r;
@@ -254,6 +243,15 @@ function bodyQuadrupede(a){
   } else {
     r = `<path d="M97 54 q20 -6 16 -26" fill="none" stroke="${a.escuro}" stroke-width="9" stroke-linecap="round" opacity=".9"/>`;
   }
+  let extra = '';
+  if (a.pintas){
+    extra = `
+      <circle cx="48" cy="55" r="3.5" fill="${a.escuro}" opacity=".55"/>
+      <circle cx="70" cy="60" r="3.5" fill="${a.escuro}" opacity=".55"/>
+      <circle cx="60" cy="72" r="3" fill="${a.escuro}" opacity=".55"/>
+      <circle cx="80" cy="52" r="3" fill="${a.escuro}" opacity=".55"/>
+      <circle cx="40" cy="70" r="3" fill="${a.escuro}" opacity=".55"/>`;
+  }
   return `<svg viewBox="0 0 120 112" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
     <ellipse cx="60" cy="101" rx="40" ry="6" fill="#000" opacity=".09"/>${r}
     <rect x="26" y="72" width="15" height="24" rx="7" fill="${a.escuro}"/>
@@ -261,11 +259,14 @@ function bodyQuadrupede(a){
     <rect x="66" y="76" width="15" height="20" rx="7" fill="${a.cor}"/>
     <rect x="84" y="72" width="15" height="24" rx="7" fill="${a.escuro}"/>
     <ellipse cx="60" cy="60" rx="45" ry="33" fill="${a.cor}" stroke="${a.escuro}" stroke-opacity=".35" stroke-width="3"/>
+    ${extra}
     <ellipse cx="60" cy="70" rx="28" ry="18" fill="${a.claro}" opacity=".5"/>
     <ellipse cx="60" cy="30" rx="17" ry="11" fill="${a.cor}" stroke="${a.escuro}" stroke-opacity=".35" stroke-width="3"/>
   </svg>`;
 }
+
 function bodyAve(a){
+  const bicoForte = a.bico === 'forte';
   return `<svg viewBox="0 0 120 112" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
     <ellipse cx="60" cy="101" rx="32" ry="5" fill="#000" opacity=".09"/>
     <path d="M84 66 L104 56 L100 68 L106 78 L86 80 Z" fill="${a.escuro}" opacity=".9"/>
@@ -278,8 +279,10 @@ function bodyAve(a){
     <path d="M42 62 q10 -2 18 8" fill="none" stroke="${a.escuro}" stroke-opacity=".35" stroke-width="2" stroke-linecap="round"/>
     <ellipse cx="58" cy="72" rx="20" ry="14" fill="${a.claro}" opacity=".45"/>
     <ellipse cx="58" cy="30" rx="15" ry="10" fill="${a.cor}" stroke="${a.escuro}" stroke-opacity=".35" stroke-width="3"/>
+    ${bicoForte ? `<path d="M52 26 L64 30 L52 34 Z" fill="#FFB030" stroke="#C07000" stroke-width="1.5"/>` : ''}
   </svg>`;
 }
+
 function bodyPeixe(a){
   return `<svg viewBox="0 0 120 112" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
     <ellipse cx="60" cy="99" rx="30" ry="5" fill="#000" opacity=".09"/>
@@ -291,7 +294,14 @@ function bodyPeixe(a){
     <ellipse cx="60" cy="30" rx="14" ry="10" fill="${a.cor}" stroke="${a.escuro}" stroke-opacity=".35" stroke-width="3"/>
   </svg>`;
 }
+
 function bodySapo(a){
+  const escamas = a.escamas ? `
+    <circle cx="42" cy="66" r="2.5" fill="${a.escuro}" opacity=".5"/>
+    <circle cx="58" cy="72" r="2.5" fill="${a.escuro}" opacity=".5"/>
+    <circle cx="74" cy="66" r="2.5" fill="${a.escuro}" opacity=".5"/>
+    <circle cx="50" cy="80" r="2.5" fill="${a.escuro}" opacity=".5"/>
+    <circle cx="70" cy="80" r="2.5" fill="${a.escuro}" opacity=".5"/>` : '';
   return `<svg viewBox="0 0 120 112" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
     <ellipse cx="60" cy="101" rx="40" ry="6" fill="#000" opacity=".09"/>
     <ellipse cx="24" cy="80" rx="17" ry="13" fill="${a.escuro}" opacity=".9"/>
@@ -301,10 +311,12 @@ function bodySapo(a){
     <rect x="42" y="82" width="9" height="14" rx="4.5" fill="${a.escuro}"/>
     <rect x="69" y="82" width="9" height="14" rx="4.5" fill="${a.escuro}"/>
     <ellipse cx="60" cy="68" rx="46" ry="30" fill="${a.cor}" stroke="${a.escuro}" stroke-opacity=".35" stroke-width="3"/>
+    ${escamas}
     <ellipse cx="60" cy="78" rx="30" ry="14" fill="${a.claro}" opacity=".55"/>
     <ellipse cx="60" cy="38" rx="16" ry="10" fill="${a.cor}" stroke="${a.escuro}" stroke-opacity=".35" stroke-width="3"/>
   </svg>`;
 }
+
 function bodyTartaruga(a){
   return `<svg viewBox="0 0 120 112" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
     <ellipse cx="60" cy="101" rx="40" ry="6" fill="#000" opacity=".09"/>
@@ -320,13 +332,42 @@ function bodyTartaruga(a){
   </svg>`;
 }
 
+/* Dragão = quadrúpede + asas */
+function bodyDragao(a){
+  return `<svg viewBox="0 0 120 112" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <ellipse cx="60" cy="101" rx="40" ry="6" fill="#000" opacity=".09"/>
+    <!-- asas -->
+    <path d="M60 48 L18 12 L30 40 L10 44 L34 56 L40 76 Z"
+          fill="${a.escuro}" opacity=".85"/>
+    <path d="M60 48 L102 12 L90 40 L110 44 L86 56 L80 76 Z"
+          fill="${a.escuro}" opacity=".85"/>
+    <!-- cauda pontuda -->
+    <path d="M95 54 L118 40 L114 62 L118 84 L95 66 Z"
+          fill="${a.escuro}" opacity=".9"/>
+    <!-- patas -->
+    <rect x="26" y="72" width="15" height="24" rx="7" fill="${a.escuro}"/>
+    <rect x="46" y="76" width="15" height="20" rx="7" fill="${a.cor}"/>
+    <rect x="66" y="76" width="15" height="20" rx="7" fill="${a.cor}"/>
+    <rect x="84" y="72" width="15" height="24" rx="7" fill="${a.escuro}"/>
+    <!-- corpo -->
+    <ellipse cx="60" cy="60" rx="45" ry="33" fill="${a.cor}"
+             stroke="${a.escuro}" stroke-opacity=".35" stroke-width="3"/>
+    <!-- barriga -->
+    <ellipse cx="60" cy="70" rx="28" ry="18" fill="${a.claro}" opacity=".5"/>
+    <!-- escamas nas costas -->
+    <path d="M38 44 q5 -8 10 0 q5 -8 10 0 q5 -8 10 0"
+          fill="none" stroke="${a.escuro}" stroke-width="3" stroke-linecap="round" opacity=".6"/>
+    <!-- toco do pescoço -->
+    <ellipse cx="60" cy="30" rx="17" ry="11" fill="${a.cor}"
+             stroke="${a.escuro}" stroke-opacity=".35" stroke-width="3"/>
+  </svg>`;
+}
+
 function aplicarTema(visual){
   const t = TEMAS[visual] || TEMAS.casa;
   const caminho = `fundos/${visual}.jpg`;
-
   stage.style.backgroundImage = t.fundo;
   decor.innerHTML = '';
-
   const img = new Image();
   img.onload = () => {
     stage.style.backgroundImage = `url('${caminho}')`;
@@ -352,10 +393,7 @@ function aplicarTema(visual){
   };
   img.src = caminho;
 }
-function limparTema(){
-  stage.style.backgroundImage = '';
-  decor.innerHTML = '';
-}
+function limparTema(){ stage.style.backgroundImage = ''; decor.innerHTML = ''; }
 
 function ajustarUnidade(){
   const w = stage.clientWidth || 320;
@@ -367,8 +405,6 @@ window.addEventListener('resize', ajustarUnidade);
 window.addEventListener('orientationchange', () => setTimeout(ajustarUnidade, 120));
 
 function atualizarIconeSom(){ btnSomMenu.textContent = somLigado ? '🔊' : '🔇'; }
-
-/* ---------- PERFIL NA TELA DO MENU ---------- */
 function atualizarPerfilMenu(){
   const p = perfilAtual();
   if (!p) return;
@@ -376,7 +412,6 @@ function atualizarPerfilMenu(){
   perfilNome.textContent = p.nome;
 }
 
-/* ---------- MAPA DE FASES ---------- */
 function montarMapa(){
   const p = perfilAtual();
   if (!p) return;
@@ -388,7 +423,6 @@ function montarMapa(){
     const btn = document.createElement('button');
     btn.className = 'fase-card' + (liberada ? '' : ' bloqueada');
     btn.type = 'button';
-
     if (liberada){
       let eHTML = '';
       for (let k=0;k<3;k++) eHTML += k < estrelas ? '⭐' : '<span class="vazia">⭐</span>';
@@ -401,9 +435,6 @@ function montarMapa(){
   });
 }
 
-/* ============================================================
-   TELA DE PERFIS
-   ============================================================ */
 function montarPerfis(){
   gridPerfis.innerHTML = '';
   Object.keys(dados.perfis).forEach(id => {
@@ -414,26 +445,18 @@ function montarPerfis(){
       <button class="btn-apagar" data-id="${id}" aria-label="Apagar perfil">×</button>
       <div class="avatar">${p.avatar}</div>
       <div class="nome">${p.nome}</div>
-      <div class="fases-info">Fase ${p.maxFase} · ${Object.values(p.estrelas).reduce((a,b)=>a+b,0)}⭐</div>
-    `;
+      <div class="fases-info">Fase ${p.maxFase} · ${Object.values(p.estrelas).reduce((a,b)=>a+b,0)}⭐</div>`;
     card.addEventListener('click', (e) => {
       if (e.target.classList.contains('btn-apagar')) return;
       trocarPerfil(id);
-      salvarPerfis();
       atualizarPerfilMenu();
       montarPerfis();
       mostrarToast(`Olá, ${p.nome}!`);
-      setTimeout(() => {
-        mostrarTela('menu');
-        atualizarPerfilMenu();
-      }, 500);
+      setTimeout(() => { mostrarTela('menu'); atualizarPerfilMenu(); }, 500);
     });
     card.querySelector('.btn-apagar').addEventListener('click', (e) => {
       e.stopPropagation();
-      if (Object.keys(dados.perfis).length <= 1){
-        mostrarToast('Precisa ter pelo menos 1 perfil!');
-        return;
-      }
+      if (Object.keys(dados.perfis).length <= 1){ mostrarToast('Precisa ter pelo menos 1 perfil!'); return; }
       if (confirm(`Apagar o perfil "${p.nome}"?`)){
         apagarPerfil(id);
         atualizarPerfilMenu();
@@ -442,8 +465,6 @@ function montarPerfis(){
     });
     gridPerfis.appendChild(card);
   });
-
-  /* card de adicionar */
   if (Object.keys(dados.perfis).length < 4){
     const add = document.createElement('div');
     add.className = 'perfil-card add';
@@ -453,10 +474,8 @@ function montarPerfis(){
   }
 }
 
-/* ---------- MODAL DE NOVO PERFIL ---------- */
 let modalPerfil = null;
 let avatarEscolhido = '🐱';
-
 function criarModal(){
   const div = document.createElement('div');
   div.id = 'modalPerfil';
@@ -474,7 +493,6 @@ function criarModal(){
     </div>`;
   document.querySelector('.app').appendChild(div);
   modalPerfil = div;
-
   const grid = div.querySelector('#avatarGrid');
   AVATARES.forEach(a => {
     const b = document.createElement('button');
@@ -486,27 +504,19 @@ function criarModal(){
     });
     grid.appendChild(b);
   });
-
   div.querySelector('#btnCancelarPerfil').addEventListener('click', fecharModalPerfil);
   div.querySelector('#btnSalvarPerfil').addEventListener('click', salvarNovoPerfil);
   div.addEventListener('click', (e) => { if (e.target === div) fecharModalPerfil(); });
 }
-
 function abrirModalNovoPerfil(){
   if (!modalPerfil) criarModal();
   avatarEscolhido = AVATARES[rand(AVATARES.length)];
   modalPerfil.querySelector('#campoNome').value = 'Jogador ' + (Object.keys(dados.perfis).length + 1);
-  modalPerfil.querySelectorAll('.avatar-op').forEach(x => {
-    x.classList.toggle('ativo', x.textContent === avatarEscolhido);
-  });
+  modalPerfil.querySelectorAll('.avatar-op').forEach(x => x.classList.toggle('ativo', x.textContent === avatarEscolhido));
   modalPerfil.classList.remove('hidden');
   setTimeout(() => modalPerfil.querySelector('#campoNome').focus(), 100);
 }
-
-function fecharModalPerfil(){
-  if (modalPerfil) modalPerfil.classList.add('hidden');
-}
-
+function fecharModalPerfil(){ if (modalPerfil) modalPerfil.classList.add('hidden'); }
 function salvarNovoPerfil(){
   const nome = modalPerfil.querySelector('#campoNome').value.trim() || 'Jogador';
   criarPerfil(nome, avatarEscolhido);
@@ -520,22 +530,16 @@ function salvarNovoPerfil(){
 function abrirFase(numero){
   const i = Math.max(0, Math.min(FASES.length-1, numero-1));
   faseAtual = { index: i, config: FASES[i] };
-
   const tema = TEMAS[faseAtual.config.visual] || TEMAS.casa;
   document.body.style.background = tema.fundo;
-
   jogoTitulo.textContent = `Fase ${numero} · ${faseAtual.config.tema}`;
-
   acertos = 0; erros = 0; ultimoId = null; atual = null; travado = false;
-
   pararAudio();
   if (somLigado) iniciarMusica();
   overlay.classList.add('hidden');
   overlay.innerHTML = '';
-
   mostrarTela('jogo');
   aplicarTema(faseAtual.config.visual);
-
   requestAnimationFrame(() => {
     ajustarUnidade();
     iniciarRodada();
@@ -572,8 +576,7 @@ function iniciarRodada(){
 
   bodyWrap.innerHTML = '';
   const imgCorpo = new Image();
-  imgCorpo.alt = '';
-  imgCorpo.draggable = false;
+  imgCorpo.alt = ''; imgCorpo.draggable = false;
   imgCorpo.onload = () => { bodyWrap.innerHTML = ''; bodyWrap.appendChild(imgCorpo); };
   imgCorpo.onerror = () => { bodyWrap.innerHTML = bodySVG(atual); };
   imgCorpo.src = `imagens/${atual.id}_corpo.png`;
@@ -599,17 +602,14 @@ function iniciarRodada(){
     const inner = document.createElement('div');
     inner.className = 'head-inner';
     inner.textContent = animal.emoji;
-
     const imgC = new Image();
-    imgC.alt = '';
-    imgC.draggable = false;
+    imgC.alt = ''; imgC.draggable = false;
     imgC.onload = () => { inner.textContent = ''; inner.appendChild(imgC); };
     imgC.src = `imagens/${animal.id}_cabeca.png`;
 
     el.appendChild(inner);
     headsEl.appendChild(el);
     ligarArraste(el, animal);
-
     setTimeout(() => {
       el.style.opacity = '1';
       el.style.setProperty('--s','1');
@@ -623,7 +623,6 @@ function iniciarRodada(){
 function ligarArraste(el, animal){
   let arrastando = false, pid = null;
   let sx=0, sy=0, dx=0, dy=0;
-
   el.addEventListener('pointerdown', e => {
     if (travado) return;
     if (e.pointerType === 'mouse' && e.button !== 0) return;
@@ -631,31 +630,25 @@ function ligarArraste(el, animal){
     pid = e.pointerId;
     try{ el.setPointerCapture(pid); }catch(_){}
     arrastando = true;
-    sx = e.clientX; sy = e.clientY;
-    dx = 0; dy = 0;
+    sx = e.clientX; sy = e.clientY; dx = 0; dy = 0;
     el.classList.add('dragging');
     el.style.transition = 'none';
   });
-
   el.addEventListener('pointermove', e => {
     if (!arrastando || e.pointerId !== pid) return;
     e.preventDefault();
-    dx = e.clientX - sx;
-    dy = e.clientY - sy;
+    dx = e.clientX - sx; dy = e.clientY - sy;
     el.style.setProperty('--dx', dx + 'px');
     el.style.setProperty('--dy', dy + 'px');
   });
-
   function soltar(e){
     if (!arrastando || e.pointerId !== pid) return;
     arrastando = false; pid = null;
     el.classList.remove('dragging');
     el.style.transition = '';
     if (travado) return;
-
     const andou = Math.hypot(dx, dy);
     if (andou < 12){ escolher(el, animal); return; }
-
     const r  = el.getBoundingClientRect();
     const sr = stage.getBoundingClientRect();
     const cx = r.left + r.width/2  - sr.left;
@@ -665,11 +658,9 @@ function ligarArraste(el, animal){
     if (Math.hypot(cx-alvoX, cy-alvoY) < sr.width * 0.32) escolher(el, animal);
     else voltarAoLugar(el);
   }
-
   el.addEventListener('pointerup', soltar);
   el.addEventListener('pointercancel', soltar);
 }
-
 function voltarAoLugar(el){
   el.style.setProperty('--dx','0px');
   el.style.setProperty('--dy','0px');
@@ -688,31 +679,25 @@ function acertou(el){
   const by = parseFloat(el.dataset.by)/100 * sr.height;
   const tx = sr.width  * (ALVO.x/100) - bx;
   const ty = sr.height * (ALVO.y/100) - by;
-
   el.style.transition = 'transform .42s cubic-bezier(.34,1.56,.64,1), opacity .3s';
   void el.offsetWidth;
   el.style.zIndex = '12';
   el.style.setProperty('--dx', tx+'px');
   el.style.setProperty('--dy', ty+'px');
-
   setTimeout(() => {
     const inner = el.querySelector('.head-inner');
     if (inner) inner.classList.add('encaixada');
   }, 380);
-
   setTimeout(() => {
     bodyWrap.classList.remove('acenando');
     void bodyWrap.offsetWidth;
     bodyWrap.classList.add('acenando');
     setTimeout(() => bodyWrap.classList.remove('acenando'), 800);
   }, 400);
-
   vibrar(35);
   [...headsEl.children].forEach(h => { if (h !== el) h.classList.add('esconder'); });
-
   explodir(sr.width * (ALVO.x/100), sr.height * (ALVO.y/100));
   tocarAcerto();
-
   setTimeout(() => {
     const letra = atual.nome.charAt(0).toUpperCase();
     nomeLabel.innerHTML = `${atual.emoji} <span class="letra-destaque">${letra}</span> de ${atual.nome.toUpperCase()}`;
@@ -720,10 +705,8 @@ function acertou(el){
     void nomeLabel.offsetWidth;
     nomeLabel.classList.add('show');
   }, 260);
-
   acertos++;
   atualizarPips();
-
   setTimeout(() => {
     falarNomeESom(atual.id, atual.nome, atual.som, () => {
       setTimeout(() => {
@@ -762,8 +745,7 @@ function explodir(x, y){
     s.textContent = ic[rand(ic.length)];
     const ang = (Math.PI*2*i/9) + Math.random()*0.6;
     const d = 55 + Math.random()*70;
-    s.style.left = x + 'px';
-    s.style.top  = y + 'px';
+    s.style.left = x + 'px'; s.style.top  = y + 'px';
     s.style.fontSize = (15 + Math.random()*16) + 'px';
     s.style.setProperty('--tx', (Math.cos(ang)*d).toFixed(1)+'px');
     s.style.setProperty('--ty', (Math.sin(ang)*d).toFixed(1)+'px');
@@ -795,22 +777,18 @@ function terminarFase(){
   const num = faseAtual.index + 1;
   const p = perfilAtual();
   const estrelas = calcularEstrelas(erros);
-
   const anterior = p.estrelas[num] || 0;
   if (estrelas > anterior) p.estrelas[num] = estrelas;
   if (num === p.maxFase && num < FASES.length) p.maxFase = num + 1;
   salvarPerfis();
-
   let eHTML = '';
   for (let k=0;k<3;k++) eHTML += k < estrelas ? '⭐' : '<span class="vazia">⭐</span>';
-
   const ultima = num === FASES.length;
   const btnProxima = !ultima ? `<button id="btnProxima">➡️ Próxima fase</button>` : '';
   const titulo = ultima ? '🎖️ Mestre dos Bichinhos!' : 'Parabéns!';
   const msg = ultima
     ? `${p.avatar} ${p.nome} completou todas as fases!`
     : `${p.avatar} ${p.nome} terminou a Fase ${num}!`;
-
   overlay.innerHTML = `
     <div class="win-card">
       <div class="trofeu">${ultima ? '🏆' : '🎉'}</div>
@@ -824,7 +802,6 @@ function terminarFase(){
       </div>
     </div>`;
   overlay.classList.remove('hidden');
-
   pararMusica();
   tocarFanfarra();
   vibrar([60, 40, 60, 40, 120]);
@@ -834,13 +811,88 @@ function terminarFase(){
       : `Parabéns ${p.nome}! Você completou a fase!`);
   }, 700);
   soltarConfete();
-
   const bp = document.getElementById('btnProxima');
   if (bp) bp.addEventListener('click', () => abrirFase(num + 1));
   document.getElementById('btnRepetir').addEventListener('click', () => abrirFase(num));
   document.getElementById('btnMenu').addEventListener('click', voltarAoMenu);
 }
 
+/* ============================================================
+   CRIA SEU BICHO
+   ============================================================ */
+let criaCorpoId = null;
+let criaCabecaId = null;
+
+function atualizarCria(){
+  /* corpo */
+  const aCorpo = ANIMAIS[criaCorpoId];
+  criaBody.innerHTML = '';
+  const imgCorpo = new Image();
+  imgCorpo.alt = ''; imgCorpo.draggable = false;
+  imgCorpo.onload = () => { criaBody.innerHTML = ''; criaBody.appendChild(imgCorpo); };
+  imgCorpo.onerror = () => { criaBody.innerHTML = bodySVG(aCorpo); };
+  imgCorpo.src = `imagens/${criaCorpoId}_corpo.png`;
+
+  /* cabeça */
+  const aCabeca = ANIMAIS[criaCabecaId];
+  criaHead.innerHTML = '';
+  const inner = document.createElement('div');
+  inner.className = 'head-inner';
+  inner.textContent = aCabeca.emoji;
+  const imgCab = new Image();
+  imgCab.alt = ''; imgCab.draggable = false;
+  imgCab.onload = () => { inner.textContent = ''; inner.appendChild(imgCab); };
+  imgCab.src = `imagens/${criaCabecaId}_cabeca.png`;
+  criaHead.appendChild(inner);
+
+  /* nome combinado */
+  const nome = `${aCorpo.nome} com cabeça de ${aCabeca.nome}`;
+  const a1 = aCorpo.nome.charAt(0).toUpperCase();
+  const a2 = aCabeca.nome.charAt(0).toUpperCase();
+  criaNome.innerHTML = `<span class="destaque">${a1}</span>${aCorpo.nome.slice(1)} com cabeça de <span class="destaque">${a2}</span>${aCabeca.nome.slice(1)}`;
+  criaNome.dataset.fala = `${aCorpo.nome} com cabeça de ${aCabeca.nome}!`;
+}
+
+function sortearCorpo(){
+  const ids = Object.keys(ANIMAIS);
+  let novo;
+  do { novo = ids[rand(ids.length)]; } while (novo === criaCorpoId && ids.length > 1);
+  criaCorpoId = novo;
+  atualizarCria();
+}
+function sortearCabeca(){
+  const ids = Object.keys(ANIMAIS);
+  let novo;
+  do { novo = ids[rand(ids.length)]; } while (novo === criaCabecaId && ids.length > 1);
+  criaCabecaId = novo;
+  atualizarCria();
+}
+function sortearTudo(){
+  sortearCorpo();
+  sortearCabeca();
+  vibrar(25);
+}
+function falarCombinacao(){
+  if (!somLigado) return;
+  const a1 = ANIMAIS[criaCorpoId].nome;
+  const a2 = ANIMAIS[criaCabecaId].nome;
+  falar(`${a1} com cabeça de ${a2}!`);
+}
+function abrirCria(){
+  pararAudio();
+  pararMusica();
+  document.body.style.background = 'linear-gradient(180deg,#ffe0f0 0%,#fff8d8 50%,#c8e8ff 100%)';
+  /* inicia com dois bichos diferentes */
+  const ids = Object.keys(ANIMAIS);
+  criaCorpoId = ids[rand(ids.length)];
+  do { criaCabecaId = ids[rand(ids.length)]; } while (criaCabecaId === criaCorpoId);
+  atualizarCria();
+  mostrarTela('cria');
+}
+
+/* ============================================================
+   NAVEGAÇÃO
+   ============================================================ */
 function voltarAoMenu(){
   pararAudio();
   pararMusica();
@@ -872,9 +924,14 @@ function comecarJogo(){
   abrirFase(Math.min(p.maxFase, FASES.length));
 }
 
-/* ---------- BOTÕES ---------- */
 document.getElementById('btnJogar').addEventListener('click', comecarJogo);
 document.getElementById('btnEscolher').addEventListener('click', abrirMapa);
+document.getElementById('btnCria').addEventListener('click', abrirCria);
+document.getElementById('btnCriaVoltar').addEventListener('click', voltarAoMenu);
+document.getElementById('btnCriaOuvir').addEventListener('click', falarCombinacao);
+document.getElementById('btnTrocaCorpo').addEventListener('click', sortearCorpo);
+document.getElementById('btnTrocaCabeca').addEventListener('click', sortearCabeca);
+document.getElementById('btnSortear').addEventListener('click', sortearTudo);
 document.getElementById('btnTrocarPerfil').addEventListener('click', abrirTelaPerfis);
 document.getElementById('btnMapaVoltar').addEventListener('click', voltarAoMenu);
 document.getElementById('btnPerfisVoltar').addEventListener('click', voltarAoMenu);
@@ -882,15 +939,11 @@ document.getElementById('btnJogoVoltar').addEventListener('click', voltarAoMenu)
 document.getElementById('btnReiniciarFase').addEventListener('click', () => {
   if (faseAtual) abrirFase(faseAtual.index + 1);
 });
-btnSomMenu.addEventListener('click', () => {
-  alternarSom();
-  atualizarIconeSom();
-});
+btnSomMenu.addEventListener('click', () => { alternarSom(); atualizarIconeSom(); });
 document.getElementById('btnZerar').addEventListener('click', () => {
   const p = perfilAtual();
   if (confirm(`Apagar o progresso de "${p.nome}"?`)){
-    p.maxFase = 1;
-    p.estrelas = {};
+    p.maxFase = 1; p.estrelas = {};
     salvarPerfis();
     montarMapa();
     mostrarToast('Progresso apagado!');
@@ -899,56 +952,33 @@ document.getElementById('btnZerar').addEventListener('click', () => {
 
 /* ---------- TELA CHEIA ---------- */
 function estaTelaCheia(){
-  return !!(document.fullscreenElement ||
-            document.webkitFullscreenElement ||
-            document.msFullscreenElement);
+  return !!(document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement);
 }
 function entrarTelaCheia(){
   const el = document.documentElement;
-  const req = el.requestFullscreen ||
-              el.webkitRequestFullscreen ||
-              el.msRequestFullscreen;
+  const req = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
   if (req){
-    try{
-      const p = req.call(el);
-      if (p && p.catch) p.catch(()=>{});
-    }catch(e){}
+    try{ const p = req.call(el); if (p && p.catch) p.catch(()=>{}); }catch(e){}
     setTimeout(tentarBloquearRotacao, 300);
   }
 }
 function sairTelaCheia(){
-  const exit = document.exitFullscreen ||
-               document.webkitExitFullscreen ||
-               document.msExitFullscreen;
+  const exit = document.exitFullscreen || document.webkitExitFullscreen || document.msExitFullscreen;
   if (exit){
-    try{
-      const p = exit.call(document);
-      if (p && p.catch) p.catch(()=>{});
-    }catch(e){}
+    try{ const p = exit.call(document); if (p && p.catch) p.catch(()=>{}); }catch(e){}
   }
 }
-function alternarTelaCheia(){
-  if (estaTelaCheia()) sairTelaCheia();
-  else entrarTelaCheia();
-}
+function alternarTelaCheia(){ estaTelaCheia() ? sairTelaCheia() : entrarTelaCheia(); }
 function atualizarIconeTelaCheia(){
   const btn = document.getElementById('btnTelaCheia');
   if (btn) btn.textContent = estaTelaCheia() ? '🗗' : '⛶';
 }
-const suportaTelaCheia = !!(
-  document.documentElement.requestFullscreen ||
-  document.documentElement.webkitRequestFullscreen
-);
-if (!suportaTelaCheia){
-  const b = document.getElementById('btnTelaCheia');
-  if (b) b.style.display = 'none';
-}
-['fullscreenchange','webkitfullscreenchange','msfullscreenchange']
-  .forEach(ev => document.addEventListener(ev, atualizarIconeTelaCheia));
+const suportaTelaCheia = !!(document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen);
+if (!suportaTelaCheia){ const b = document.getElementById('btnTelaCheia'); if (b) b.style.display = 'none'; }
+['fullscreenchange','webkitfullscreenchange','msfullscreenchange'].forEach(ev => document.addEventListener(ev, atualizarIconeTelaCheia));
 const btnTC = document.getElementById('btnTelaCheia');
 if (btnTC) btnTC.addEventListener('click', alternarTelaCheia);
 
-/* ---------- INÍCIO ---------- */
 carregarPerfis();
 atualizarPerfilMenu();
 atualizarIconeSom();
